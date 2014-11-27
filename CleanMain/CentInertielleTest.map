@@ -1,0 +1,623 @@
+GNU ld (GNU Binutils) 2.20.1.20100303
+Archive member included because of file (symbol)
+
+/usr/local/m68k-elf/lib/libm.a(w_asin.o)
+                              CentInertielleTest.o (asin)
+/usr/local/m68k-elf/lib/libm.a(e_asin.o)
+                              /usr/local/m68k-elf/lib/libm.a(w_asin.o) (__ieee754_asin)
+/usr/local/m68k-elf/lib/libm.a(e_sqrt.o)
+                              /usr/local/m68k-elf/lib/libm.a(e_asin.o) (__ieee754_sqrt)
+/usr/local/m68k-elf/lib/libm.a(s_fabs.o)
+                              /usr/local/m68k-elf/lib/libm.a(w_asin.o) (fabs)
+/usr/local/m68k-elf/lib/libm.a(s_isnand.o)
+                              /usr/local/m68k-elf/lib/libm.a(w_asin.o) (__isnand)
+/usr/local/m68k-elf/lib/libm.a(s_lib_ver.o)
+                              /usr/local/m68k-elf/lib/libm.a(w_asin.o) (__fdlib_version)
+/usr/local/m68k-elf/lib/libm.a(s_matherr.o)
+                              /usr/local/m68k-elf/lib/libm.a(w_asin.o) (matherr)
+/usr/local/lib/gcc/m68k-elf/4.5.2/m5211//libgcc.a(_udivsi3.o)
+                              libs/mfprintf/mfprintf.o (__udivsi3)
+/usr/local/lib/gcc/m68k-elf/4.5.2/m5211//libgcc.a(_divsi3.o)
+                              libs/mfprintf/mfprintf.o (__divsi3)
+/usr/local/lib/gcc/m68k-elf/4.5.2/m5211//libgcc.a(_umodsi3.o)
+                              libs/mfprintf/mfprintf.o (__umodsi3)
+/usr/local/lib/gcc/m68k-elf/4.5.2/m5211//libgcc.a(_modsi3.o)
+                              libs/mfprintf/mfprintf.o (__modsi3)
+/usr/local/lib/gcc/m68k-elf/4.5.2/m5211//libgcc.a(_double.o)
+                              /usr/local/m68k-elf/lib/libm.a(e_asin.o) (__adddf3)
+/usr/local/lib/gcc/m68k-elf/4.5.2/m5211//libgcc.a(_floatex.o)
+                              /usr/local/lib/gcc/m68k-elf/4.5.2/m5211//libgcc.a(_double.o) (_fpCCR)
+/usr/local/lib/gcc/m68k-elf/4.5.2/m5211//libgcc.a(_gtdf2.o)
+                              /usr/local/m68k-elf/lib/libm.a(w_asin.o) (__gtdf2)
+/usr/local/lib/gcc/m68k-elf/4.5.2/m5211//libgcc.a(fpgnulib.o)
+                              CentInertielleTest.o (__floatsidf)
+
+Allocating common symbols
+Common symbol       size              file
+
+tabInertie          0x9               CentInertielleTest.o
+bufGyroOld          0x6               CentInertielleTest.o
+
+Memory Configuration
+
+Name             Origin             Length             Attributes
+*default*        0x0000000000000000 0xffffffffffffffff
+
+Linker script and memory map
+
+LOAD libs/spiUtils/spiUtils.o
+LOAD libs/crt/crt.o
+LOAD libs/mfprintf/mfprintf.o
+LOAD libs/lib-iobase-evb5213/lib-iobase-evb5213.o
+LOAD CentInertielleTest.o
+LOAD /usr/local/m68k-elf/lib/libm.a
+LOAD /usr/local/lib/gcc/m68k-elf/4.5.2/m5211//libgcc.a
+Address of section .text set to 0x20002000
+                0x0000000080000000                PROVIDE (__executable_start, 0x80000000)
+                0x0000000080000000                . = (0x80000000 + SIZEOF_HEADERS)
+
+.interp
+ *(.interp)
+
+.note.gnu.build-id
+ *(.note.gnu.build-id)
+
+.hash
+ *(.hash)
+
+.gnu.hash
+ *(.gnu.hash)
+
+.dynsym
+ *(.dynsym)
+
+.dynstr
+ *(.dynstr)
+
+.gnu.version
+ *(.gnu.version)
+
+.gnu.version_d
+ *(.gnu.version_d)
+
+.gnu.version_r
+ *(.gnu.version_r)
+
+.rela.dyn       0x0000000080000000        0x0
+ *(.rela.init)
+ *(.rela.text .rela.text.* .rela.gnu.linkonce.t.*)
+ *(.rela.fini)
+ *(.rela.rodata .rela.rodata.* .rela.gnu.linkonce.r.*)
+ *(.rela.data .rela.data.* .rela.gnu.linkonce.d.*)
+ *(.rela.tdata .rela.tdata.* .rela.gnu.linkonce.td.*)
+ *(.rela.tbss .rela.tbss.* .rela.gnu.linkonce.tb.*)
+ *(.rela.ctors)
+ *(.rela.dtors)
+ *(.rela.got)
+ *(.rela.bss .rela.bss.* .rela.gnu.linkonce.b.*)
+                0x0000000080000000                PROVIDE (__rel_iplt_start, .)
+                0x0000000080000000                PROVIDE (__rel_iplt_end, .)
+                0x0000000080000000                PROVIDE (__rela_iplt_start, .)
+ *(.rela.iplt)
+                0x0000000080000000                PROVIDE (__rela_iplt_end, .)
+
+.rela.plt
+ *(.rela.plt)
+
+.init
+ *(.init)
+
+.plt
+ *(.plt)
+
+.iplt
+ *(.iplt)
+
+.text           0x0000000020002000     0x2d90
+ *(.text.unlikely .text.*_unlikely)
+ *(.text .stub .text.* .gnu.linkonce.t.*)
+ .text          0x0000000020002000      0x304 libs/spiUtils/spiUtils.o
+                0x0000000020002000                Init_spi
+                0x00000000200020c2                SpiWrite8
+                0x000000002000217a                SpiRead6R
+                0x0000000020002242                SpiRead8
+ .text          0x0000000020002304       0x28 libs/crt/crt.o
+                0x0000000020002304                _start
+                0x0000000020002304                start
+                0x0000000020002328                __init
+                0x000000002000232a                __fini
+ .text          0x000000002000232c      0x638 libs/mfprintf/mfprintf.o
+                0x000000002000232c                strcpy
+                0x000000002000237a                strlen
+                0x00000000200023b6                itoa
+                0x00000000200024b2                ultoa
+                0x000000002000257a                printf
+ .text          0x0000000020002964       0xbc libs/lib-iobase-evb5213/lib-iobase-evb5213.o
+                0x0000000020002964                kbhit
+                0x0000000020002980                getch
+                0x00000000200029b0                out_char
+                0x00000000200029ee                puts
+ .text          0x0000000020002a20      0x5dc CentInertielleTest.o
+                0x0000000020002a20                GetInertie
+                0x0000000020002c4e                main
+                0x0000000020002ebe                Init_AccGyro
+ .text          0x0000000020002ffc       0xf8 /usr/local/m68k-elf/lib/libm.a(w_asin.o)
+                0x0000000020002ffc                asin
+ .text          0x00000000200030f4      0x84a /usr/local/m68k-elf/lib/libm.a(e_asin.o)
+                0x00000000200030f4                __ieee754_asin
+ *fill*         0x000000002000393e        0x2 4e714e71
+ .text          0x0000000020003940      0x2aa /usr/local/m68k-elf/lib/libm.a(e_sqrt.o)
+                0x0000000020003940                __ieee754_sqrt
+ *fill*         0x0000000020003bea        0x2 4e714e71
+ .text          0x0000000020003bec       0x22 /usr/local/m68k-elf/lib/libm.a(s_fabs.o)
+                0x0000000020003bec                fabs
+ *fill*         0x0000000020003c0e        0x2 4e714e71
+ .text          0x0000000020003c10       0x34 /usr/local/m68k-elf/lib/libm.a(s_isnand.o)
+                0x0000000020003c10                __isnand
+ .text          0x0000000020003c44        0x0 /usr/local/m68k-elf/lib/libm.a(s_lib_ver.o)
+ .text          0x0000000020003c44        0xa /usr/local/m68k-elf/lib/libm.a(s_matherr.o)
+                0x0000000020003c44                matherr
+ *fill*         0x0000000020003c4e        0x2 4e714e71
+ .text          0x0000000020003c50       0x30 /usr/local/lib/gcc/m68k-elf/4.5.2/m5211//libgcc.a(_udivsi3.o)
+                0x0000000020003c50                __udivsi3
+ .text          0x0000000020003c80       0x2e /usr/local/lib/gcc/m68k-elf/4.5.2/m5211//libgcc.a(_divsi3.o)
+                0x0000000020003c80                __divsi3
+ *fill*         0x0000000020003cae        0x2 4e714e71
+ .text          0x0000000020003cb0       0x26 /usr/local/lib/gcc/m68k-elf/4.5.2/m5211//libgcc.a(_umodsi3.o)
+                0x0000000020003cb0                __umodsi3
+ *fill*         0x0000000020003cd6        0x2 4e714e71
+ .text          0x0000000020003cd8       0x26 /usr/local/lib/gcc/m68k-elf/4.5.2/m5211//libgcc.a(_modsi3.o)
+                0x0000000020003cd8                __modsi3
+ *fill*         0x0000000020003cfe        0x2 4e714e71
+ .text          0x0000000020003d00      0xba0 /usr/local/lib/gcc/m68k-elf/4.5.2/m5211//libgcc.a(_double.o)
+                0x0000000020003d5a                __subdf3
+                0x0000000020003d60                __adddf3
+                0x00000000200041fc                __muldf3
+                0x00000000200043d8                __divdf3
+                0x00000000200046c8                __negdf2
+                0x0000000020004726                __cmpdf2_internal
+                0x00000000200047fe                __cmpdf2
+ .text          0x00000000200048a0       0x74 /usr/local/lib/gcc/m68k-elf/4.5.2/m5211//libgcc.a(_floatex.o)
+                0x00000000200048a0                __clear_sticky_bit
+                0x00000000200048ac                $_exception_handler
+ .text          0x0000000020004914       0x22 /usr/local/lib/gcc/m68k-elf/4.5.2/m5211//libgcc.a(_gtdf2.o)
+                0x0000000020004914                __gtdf2
+ *fill*         0x0000000020004936        0x2 4e714e71
+ .text          0x0000000020004938      0x458 /usr/local/lib/gcc/m68k-elf/4.5.2/m5211//libgcc.a(fpgnulib.o)
+                0x0000000020004938                __unordsf2
+                0x0000000020004992                __unorddf2
+                0x0000000020004a1e                __floatunsidf
+                0x0000000020004a88                __floatsidf
+                0x0000000020004b1c                __floatunsisf
+                0x0000000020004b36                __floatsisf
+                0x0000000020004b50                __extendsfdf2
+                0x0000000020004be0                __truncdfsf2
+                0x0000000020004cfe                __fixdfsi
+                0x0000000020004d72                __fixsfsi
+ *(.gnu.warning)
+
+.fini
+ *(.fini)
+                0x0000000020004d90                PROVIDE (__etext, .)
+                0x0000000020004d90                PROVIDE (_etext, .)
+                0x0000000020004d90                PROVIDE (etext, .)
+
+.rodata         0x0000000020004d90       0xbc
+ *(.rodata .rodata.* .gnu.linkonce.r.*)
+ .rodata        0x0000000020004d90       0x3c libs/mfprintf/mfprintf.o
+                0x0000000020004d90                chiffre
+                0x0000000020004da0                code_descr
+                0x0000000020004db6                code_type
+ .rodata        0x0000000020004dcc       0x77 CentInertielleTest.o
+ .rodata.str1.1
+                0x0000000020004e43        0x5 /usr/local/m68k-elf/lib/libm.a(w_asin.o)
+ .rodata        0x0000000020004e48        0x4 /usr/local/m68k-elf/lib/libm.a(s_lib_ver.o)
+                0x0000000020004e48                __fdlib_version
+
+.rodata1
+ *(.rodata1)
+
+.eh_frame_hdr
+ *(.eh_frame_hdr)
+
+.eh_frame
+ *(.eh_frame)
+
+.gcc_except_table
+ *(.gcc_except_table .gcc_except_table.*)
+                0x0000000020004e4c                . = (ALIGN (0x2000) - ((0x2000 - .) & 0x1fff))
+                0x0000000020006e4c                . = (0x2000 DATA_SEGMENT_ALIGN 0x2000)
+
+.eh_frame
+ *(.eh_frame)
+
+.gcc_except_table
+ *(.gcc_except_table .gcc_except_table.*)
+
+.tdata
+ *(.tdata .tdata.* .gnu.linkonce.td.*)
+
+.tbss
+ *(.tbss .tbss.* .gnu.linkonce.tb.*)
+ *(.tcommon)
+
+.preinit_array  0x0000000020006e4c        0x0
+                0x0000000020006e4c                PROVIDE (__preinit_array_start, .)
+ *(.preinit_array)
+                0x0000000020006e4c                PROVIDE (__preinit_array_end, .)
+
+.init_array     0x0000000020006e4c        0x0
+                0x0000000020006e4c                PROVIDE (__init_array_start, .)
+ *(SORT(.init_array.*))
+ *(.init_array)
+                0x0000000020006e4c                PROVIDE (__init_array_end, .)
+
+.fini_array     0x0000000020006e4c        0x0
+                0x0000000020006e4c                PROVIDE (__fini_array_start, .)
+ *(.fini_array)
+ *(SORT(.fini_array.*))
+                0x0000000020006e4c                PROVIDE (__fini_array_end, .)
+
+.ctors
+ *crtbegin.o(.ctors)
+ *crtbegin?.o(.ctors)
+ *(EXCLUDE_FILE(*crtend?.o *crtend.o) .ctors)
+ *(SORT(.ctors.*))
+ *(.ctors)
+
+.dtors
+ *crtbegin.o(.dtors)
+ *crtbegin?.o(.dtors)
+ *(EXCLUDE_FILE(*crtend?.o *crtend.o) .dtors)
+ *(SORT(.dtors.*))
+ *(.dtors)
+
+.jcr
+ *(.jcr)
+
+.data.rel.ro
+ *(.data.rel.ro.local* .gnu.linkonce.d.rel.ro.local.*)
+ *(.data.rel.ro* .gnu.linkonce.d.rel.ro.*)
+
+.dynamic
+ *(.dynamic)
+                0x0000000020006e4c                . = (. DATA_SEGMENT_RELRO_END 0x0)
+
+.got
+ *(.got.plt)
+ *(.igot.plt)
+ *(.got)
+ *(.igot)
+
+.data           0x0000000020006e4c       0x20
+ *(.data .data.* .gnu.linkonce.d.*)
+ .data          0x0000000020006e4c        0x0 libs/spiUtils/spiUtils.o
+ .data          0x0000000020006e4c        0x0 libs/crt/crt.o
+ .data          0x0000000020006e4c        0x0 libs/mfprintf/mfprintf.o
+ .data          0x0000000020006e4c        0x0 libs/lib-iobase-evb5213/lib-iobase-evb5213.o
+ .data          0x0000000020006e4c        0x4 CentInertielleTest.o
+                0x0000000020006e4c                totalData
+ .data          0x0000000020006e50        0x0 /usr/local/m68k-elf/lib/libm.a(w_asin.o)
+ .data          0x0000000020006e50        0x0 /usr/local/m68k-elf/lib/libm.a(e_asin.o)
+ .data          0x0000000020006e50        0x0 /usr/local/m68k-elf/lib/libm.a(e_sqrt.o)
+ .data          0x0000000020006e50        0x0 /usr/local/m68k-elf/lib/libm.a(s_fabs.o)
+ .data          0x0000000020006e50        0x0 /usr/local/m68k-elf/lib/libm.a(s_isnand.o)
+ .data          0x0000000020006e50        0x0 /usr/local/m68k-elf/lib/libm.a(s_lib_ver.o)
+ .data          0x0000000020006e50        0x0 /usr/local/m68k-elf/lib/libm.a(s_matherr.o)
+ .data          0x0000000020006e50        0x0 /usr/local/lib/gcc/m68k-elf/4.5.2/m5211//libgcc.a(_udivsi3.o)
+ .data          0x0000000020006e50        0x0 /usr/local/lib/gcc/m68k-elf/4.5.2/m5211//libgcc.a(_divsi3.o)
+ .data          0x0000000020006e50        0x0 /usr/local/lib/gcc/m68k-elf/4.5.2/m5211//libgcc.a(_umodsi3.o)
+ .data          0x0000000020006e50        0x0 /usr/local/lib/gcc/m68k-elf/4.5.2/m5211//libgcc.a(_modsi3.o)
+ .data          0x0000000020006e50        0x0 /usr/local/lib/gcc/m68k-elf/4.5.2/m5211//libgcc.a(_double.o)
+ .data          0x0000000020006e50       0x1c /usr/local/lib/gcc/m68k-elf/4.5.2/m5211//libgcc.a(_floatex.o)
+                0x0000000020006e50                _fpCCR
+ .data          0x0000000020006e6c        0x0 /usr/local/lib/gcc/m68k-elf/4.5.2/m5211//libgcc.a(_gtdf2.o)
+ .data          0x0000000020006e6c        0x0 /usr/local/lib/gcc/m68k-elf/4.5.2/m5211//libgcc.a(fpgnulib.o)
+
+.data1
+ *(.data1)
+                0x0000000020006e6c                _edata = .
+                0x0000000020006e6c                PROVIDE (edata, .)
+                0x0000000020006e6c                __bss_start = .
+
+.bss            0x0000000020006e6c       0x1c
+ *(.dynbss)
+ *(.bss .bss.* .gnu.linkonce.b.*)
+ .bss           0x0000000020006e6c        0x0 libs/spiUtils/spiUtils.o
+ .bss           0x0000000020006e6c        0x0 libs/crt/crt.o
+ .bss           0x0000000020006e6c        0x0 libs/mfprintf/mfprintf.o
+ .bss           0x0000000020006e6c        0x0 libs/lib-iobase-evb5213/lib-iobase-evb5213.o
+ .bss           0x0000000020006e6c        0xc CentInertielleTest.o
+                0x0000000020006e6c                __errno
+                0x0000000020006e70                testMode
+                0x0000000020006e74                dataTraced
+ .bss           0x0000000020006e78        0x0 /usr/local/m68k-elf/lib/libm.a(w_asin.o)
+ .bss           0x0000000020006e78        0x0 /usr/local/m68k-elf/lib/libm.a(e_asin.o)
+ .bss           0x0000000020006e78        0x0 /usr/local/m68k-elf/lib/libm.a(e_sqrt.o)
+ .bss           0x0000000020006e78        0x0 /usr/local/m68k-elf/lib/libm.a(s_fabs.o)
+ .bss           0x0000000020006e78        0x0 /usr/local/m68k-elf/lib/libm.a(s_isnand.o)
+ .bss           0x0000000020006e78        0x0 /usr/local/m68k-elf/lib/libm.a(s_lib_ver.o)
+ .bss           0x0000000020006e78        0x0 /usr/local/m68k-elf/lib/libm.a(s_matherr.o)
+ .bss           0x0000000020006e78        0x0 /usr/local/lib/gcc/m68k-elf/4.5.2/m5211//libgcc.a(_udivsi3.o)
+ .bss           0x0000000020006e78        0x0 /usr/local/lib/gcc/m68k-elf/4.5.2/m5211//libgcc.a(_divsi3.o)
+ .bss           0x0000000020006e78        0x0 /usr/local/lib/gcc/m68k-elf/4.5.2/m5211//libgcc.a(_umodsi3.o)
+ .bss           0x0000000020006e78        0x0 /usr/local/lib/gcc/m68k-elf/4.5.2/m5211//libgcc.a(_modsi3.o)
+ .bss           0x0000000020006e78        0x0 /usr/local/lib/gcc/m68k-elf/4.5.2/m5211//libgcc.a(_double.o)
+ .bss           0x0000000020006e78        0x0 /usr/local/lib/gcc/m68k-elf/4.5.2/m5211//libgcc.a(_floatex.o)
+ .bss           0x0000000020006e78        0x0 /usr/local/lib/gcc/m68k-elf/4.5.2/m5211//libgcc.a(_gtdf2.o)
+ .bss           0x0000000020006e78        0x0 /usr/local/lib/gcc/m68k-elf/4.5.2/m5211//libgcc.a(fpgnulib.o)
+ *(COMMON)
+ COMMON         0x0000000020006e78        0xf CentInertielleTest.o
+                0x0000000020006e78                tabInertie
+                0x0000000020006e81                bufGyroOld
+                0x0000000020006e88                . = ALIGN ((. != 0x0)?0x4:0x1)
+ *fill*         0x0000000020006e87        0x1 00
+                0x0000000020006e88                . = ALIGN (0x4)
+                0x0000000020006e88                . = ALIGN (0x4)
+                0x0000000020006e88                _end = .
+                0x0000000020006e88                PROVIDE (end, .)
+                0x0000000020006e88                . = DATA_SEGMENT_END (.)
+
+.stab
+ *(.stab)
+
+.stabstr
+ *(.stabstr)
+
+.stab.excl
+ *(.stab.excl)
+
+.stab.exclstr
+ *(.stab.exclstr)
+
+.stab.index
+ *(.stab.index)
+
+.stab.indexstr
+ *(.stab.indexstr)
+
+.comment        0x0000000000000000      0x1c8
+ *(.comment)
+ .comment       0x0000000000000000       0x12 libs/spiUtils/spiUtils.o
+ .comment       0x0000000000000012       0x2a libs/mfprintf/mfprintf.o
+ .comment       0x000000000000003c       0x2a libs/lib-iobase-evb5213/lib-iobase-evb5213.o
+ .comment       0x0000000000000066       0x12 CentInertielleTest.o
+ .comment       0x0000000000000078       0x2a /usr/local/m68k-elf/lib/libm.a(w_asin.o)
+ .comment       0x00000000000000a2       0x2a /usr/local/m68k-elf/lib/libm.a(e_asin.o)
+ .comment       0x00000000000000cc       0x2a /usr/local/m68k-elf/lib/libm.a(e_sqrt.o)
+ .comment       0x00000000000000f6       0x2a /usr/local/m68k-elf/lib/libm.a(s_fabs.o)
+ .comment       0x0000000000000120       0x2a /usr/local/m68k-elf/lib/libm.a(s_isnand.o)
+ .comment       0x000000000000014a       0x2a /usr/local/m68k-elf/lib/libm.a(s_lib_ver.o)
+ .comment       0x0000000000000174       0x2a /usr/local/m68k-elf/lib/libm.a(s_matherr.o)
+ .comment       0x000000000000019e       0x2a /usr/local/lib/gcc/m68k-elf/4.5.2/m5211//libgcc.a(fpgnulib.o)
+
+.debug
+ *(.debug)
+
+.line
+ *(.line)
+
+.debug_srcinfo
+ *(.debug_srcinfo)
+
+.debug_sfnames
+ *(.debug_sfnames)
+
+.debug_aranges  0x0000000000000000      0x260
+ *(.debug_aranges)
+ .debug_aranges
+                0x0000000000000000       0x20 libs/spiUtils/spiUtils.o
+ .debug_aranges
+                0x0000000000000020       0x20 libs/crt/crt.o
+ .debug_aranges
+                0x0000000000000040       0x20 libs/mfprintf/mfprintf.o
+ .debug_aranges
+                0x0000000000000060       0x20 libs/lib-iobase-evb5213/lib-iobase-evb5213.o
+ .debug_aranges
+                0x0000000000000080       0x20 CentInertielleTest.o
+ .debug_aranges
+                0x00000000000000a0       0x20 /usr/local/m68k-elf/lib/libm.a(w_asin.o)
+ .debug_aranges
+                0x00000000000000c0       0x20 /usr/local/m68k-elf/lib/libm.a(e_asin.o)
+ .debug_aranges
+                0x00000000000000e0       0x20 /usr/local/m68k-elf/lib/libm.a(e_sqrt.o)
+ .debug_aranges
+                0x0000000000000100       0x20 /usr/local/m68k-elf/lib/libm.a(s_fabs.o)
+ .debug_aranges
+                0x0000000000000120       0x20 /usr/local/m68k-elf/lib/libm.a(s_isnand.o)
+ .debug_aranges
+                0x0000000000000140       0x20 /usr/local/m68k-elf/lib/libm.a(s_matherr.o)
+ .debug_aranges
+                0x0000000000000160       0x20 /usr/local/lib/gcc/m68k-elf/4.5.2/m5211//libgcc.a(_udivsi3.o)
+ .debug_aranges
+                0x0000000000000180       0x20 /usr/local/lib/gcc/m68k-elf/4.5.2/m5211//libgcc.a(_divsi3.o)
+ .debug_aranges
+                0x00000000000001a0       0x20 /usr/local/lib/gcc/m68k-elf/4.5.2/m5211//libgcc.a(_umodsi3.o)
+ .debug_aranges
+                0x00000000000001c0       0x20 /usr/local/lib/gcc/m68k-elf/4.5.2/m5211//libgcc.a(_modsi3.o)
+ .debug_aranges
+                0x00000000000001e0       0x20 /usr/local/lib/gcc/m68k-elf/4.5.2/m5211//libgcc.a(_double.o)
+ .debug_aranges
+                0x0000000000000200       0x20 /usr/local/lib/gcc/m68k-elf/4.5.2/m5211//libgcc.a(_floatex.o)
+ .debug_aranges
+                0x0000000000000220       0x20 /usr/local/lib/gcc/m68k-elf/4.5.2/m5211//libgcc.a(_gtdf2.o)
+ .debug_aranges
+                0x0000000000000240       0x20 /usr/local/lib/gcc/m68k-elf/4.5.2/m5211//libgcc.a(fpgnulib.o)
+
+.debug_pubnames
+                0x0000000000000000      0x318
+ *(.debug_pubnames)
+ .debug_pubnames
+                0x0000000000000000       0x48 libs/spiUtils/spiUtils.o
+ .debug_pubnames
+                0x0000000000000048       0x6f libs/mfprintf/mfprintf.o
+ .debug_pubnames
+                0x00000000000000b7       0x3c libs/lib-iobase-evb5213/lib-iobase-evb5213.o
+ .debug_pubnames
+                0x00000000000000f3       0x8f CentInertielleTest.o
+ .debug_pubnames
+                0x0000000000000182       0x1b /usr/local/m68k-elf/lib/libm.a(w_asin.o)
+ .debug_pubnames
+                0x000000000000019d       0x25 /usr/local/m68k-elf/lib/libm.a(e_asin.o)
+ .debug_pubnames
+                0x00000000000001c2       0x25 /usr/local/m68k-elf/lib/libm.a(e_sqrt.o)
+ .debug_pubnames
+                0x00000000000001e7       0x1b /usr/local/m68k-elf/lib/libm.a(s_fabs.o)
+ .debug_pubnames
+                0x0000000000000202       0x1f /usr/local/m68k-elf/lib/libm.a(s_isnand.o)
+ .debug_pubnames
+                0x0000000000000221       0x26 /usr/local/m68k-elf/lib/libm.a(s_lib_ver.o)
+ .debug_pubnames
+                0x0000000000000247       0x1e /usr/local/m68k-elf/lib/libm.a(s_matherr.o)
+ .debug_pubnames
+                0x0000000000000265       0xb3 /usr/local/lib/gcc/m68k-elf/4.5.2/m5211//libgcc.a(fpgnulib.o)
+
+.debug_info     0x0000000000000000     0x1e15
+ *(.debug_info .gnu.linkonce.wi.*)
+ .debug_info    0x0000000000000000      0x11d libs/spiUtils/spiUtils.o
+ .debug_info    0x000000000000011d       0x87 libs/crt/crt.o
+ .debug_info    0x00000000000001a4      0x428 libs/mfprintf/mfprintf.o
+ .debug_info    0x00000000000005cc      0x1e9 libs/lib-iobase-evb5213/lib-iobase-evb5213.o
+ .debug_info    0x00000000000007b5      0x29d CentInertielleTest.o
+ .debug_info    0x0000000000000a52      0x190 /usr/local/m68k-elf/lib/libm.a(w_asin.o)
+ .debug_info    0x0000000000000be2      0x303 /usr/local/m68k-elf/lib/libm.a(e_asin.o)
+ .debug_info    0x0000000000000ee5      0x230 /usr/local/m68k-elf/lib/libm.a(e_sqrt.o)
+ .debug_info    0x0000000000001115      0x136 /usr/local/m68k-elf/lib/libm.a(s_fabs.o)
+ .debug_info    0x000000000000124b      0x14a /usr/local/m68k-elf/lib/libm.a(s_isnand.o)
+ .debug_info    0x0000000000001395       0xc8 /usr/local/m68k-elf/lib/libm.a(s_lib_ver.o)
+ .debug_info    0x000000000000145d      0x132 /usr/local/m68k-elf/lib/libm.a(s_matherr.o)
+ .debug_info    0x000000000000158f       0xaa /usr/local/lib/gcc/m68k-elf/4.5.2/m5211//libgcc.a(_udivsi3.o)
+ .debug_info    0x0000000000001639       0xaa /usr/local/lib/gcc/m68k-elf/4.5.2/m5211//libgcc.a(_divsi3.o)
+ .debug_info    0x00000000000016e3       0xaa /usr/local/lib/gcc/m68k-elf/4.5.2/m5211//libgcc.a(_umodsi3.o)
+ .debug_info    0x000000000000178d       0xaa /usr/local/lib/gcc/m68k-elf/4.5.2/m5211//libgcc.a(_modsi3.o)
+ .debug_info    0x0000000000001837       0xaa /usr/local/lib/gcc/m68k-elf/4.5.2/m5211//libgcc.a(_double.o)
+ .debug_info    0x00000000000018e1       0xaa /usr/local/lib/gcc/m68k-elf/4.5.2/m5211//libgcc.a(_floatex.o)
+ .debug_info    0x000000000000198b       0xaa /usr/local/lib/gcc/m68k-elf/4.5.2/m5211//libgcc.a(_gtdf2.o)
+ .debug_info    0x0000000000001a35      0x3e0 /usr/local/lib/gcc/m68k-elf/4.5.2/m5211//libgcc.a(fpgnulib.o)
+
+.debug_abbrev   0x0000000000000000      0xac8
+ *(.debug_abbrev)
+ .debug_abbrev  0x0000000000000000       0xbb libs/spiUtils/spiUtils.o
+ .debug_abbrev  0x00000000000000bb       0x14 libs/crt/crt.o
+ .debug_abbrev  0x00000000000000cf       0xd1 libs/mfprintf/mfprintf.o
+ .debug_abbrev  0x00000000000001a0       0x8e libs/lib-iobase-evb5213/lib-iobase-evb5213.o
+ .debug_abbrev  0x000000000000022e      0x10a CentInertielleTest.o
+ .debug_abbrev  0x0000000000000338       0xdb /usr/local/m68k-elf/lib/libm.a(w_asin.o)
+ .debug_abbrev  0x0000000000000413      0x129 /usr/local/m68k-elf/lib/libm.a(e_asin.o)
+ .debug_abbrev  0x000000000000053c      0x111 /usr/local/m68k-elf/lib/libm.a(e_sqrt.o)
+ .debug_abbrev  0x000000000000064d       0xc3 /usr/local/m68k-elf/lib/libm.a(s_fabs.o)
+ .debug_abbrev  0x0000000000000710       0xc3 /usr/local/m68k-elf/lib/libm.a(s_isnand.o)
+ .debug_abbrev  0x00000000000007d3       0x58 /usr/local/m68k-elf/lib/libm.a(s_lib_ver.o)
+ .debug_abbrev  0x000000000000082b       0x93 /usr/local/m68k-elf/lib/libm.a(s_matherr.o)
+ .debug_abbrev  0x00000000000008be       0x14 /usr/local/lib/gcc/m68k-elf/4.5.2/m5211//libgcc.a(_udivsi3.o)
+ .debug_abbrev  0x00000000000008d2       0x14 /usr/local/lib/gcc/m68k-elf/4.5.2/m5211//libgcc.a(_divsi3.o)
+ .debug_abbrev  0x00000000000008e6       0x14 /usr/local/lib/gcc/m68k-elf/4.5.2/m5211//libgcc.a(_umodsi3.o)
+ .debug_abbrev  0x00000000000008fa       0x14 /usr/local/lib/gcc/m68k-elf/4.5.2/m5211//libgcc.a(_modsi3.o)
+ .debug_abbrev  0x000000000000090e       0x14 /usr/local/lib/gcc/m68k-elf/4.5.2/m5211//libgcc.a(_double.o)
+ .debug_abbrev  0x0000000000000922       0x14 /usr/local/lib/gcc/m68k-elf/4.5.2/m5211//libgcc.a(_floatex.o)
+ .debug_abbrev  0x0000000000000936       0x14 /usr/local/lib/gcc/m68k-elf/4.5.2/m5211//libgcc.a(_gtdf2.o)
+ .debug_abbrev  0x000000000000094a      0x17e /usr/local/lib/gcc/m68k-elf/4.5.2/m5211//libgcc.a(fpgnulib.o)
+
+.debug_line     0x0000000000000000     0x11f8
+ *(.debug_line)
+ .debug_line    0x0000000000000000       0xd6 libs/spiUtils/spiUtils.o
+ .debug_line    0x00000000000000d6       0x43 libs/crt/crt.o
+ .debug_line    0x0000000000000119       0xf5 libs/mfprintf/mfprintf.o
+ .debug_line    0x000000000000020e       0x56 libs/lib-iobase-evb5213/lib-iobase-evb5213.o
+ .debug_line    0x0000000000000264      0x10b CentInertielleTest.o
+ .debug_line    0x000000000000036f       0xbb /usr/local/m68k-elf/lib/libm.a(w_asin.o)
+ .debug_line    0x000000000000042a      0x134 /usr/local/m68k-elf/lib/libm.a(e_asin.o)
+ .debug_line    0x000000000000055e      0x165 /usr/local/m68k-elf/lib/libm.a(e_sqrt.o)
+ .debug_line    0x00000000000006c3       0xfa /usr/local/m68k-elf/lib/libm.a(s_fabs.o)
+ .debug_line    0x00000000000007bd       0xc5 /usr/local/m68k-elf/lib/libm.a(s_isnand.o)
+ .debug_line    0x0000000000000882       0x9d /usr/local/m68k-elf/lib/libm.a(s_lib_ver.o)
+ .debug_line    0x000000000000091f       0xae /usr/local/m68k-elf/lib/libm.a(s_matherr.o)
+ .debug_line    0x00000000000009cd       0x7e /usr/local/lib/gcc/m68k-elf/4.5.2/m5211//libgcc.a(_udivsi3.o)
+ .debug_line    0x0000000000000a4b       0x7f /usr/local/lib/gcc/m68k-elf/4.5.2/m5211//libgcc.a(_divsi3.o)
+ .debug_line    0x0000000000000aca       0x78 /usr/local/lib/gcc/m68k-elf/4.5.2/m5211//libgcc.a(_umodsi3.o)
+ .debug_line    0x0000000000000b42       0x78 /usr/local/lib/gcc/m68k-elf/4.5.2/m5211//libgcc.a(_modsi3.o)
+ .debug_line    0x0000000000000bba      0x45c /usr/local/lib/gcc/m68k-elf/4.5.2/m5211//libgcc.a(_double.o)
+ .debug_line    0x0000000000001016       0x8a /usr/local/lib/gcc/m68k-elf/4.5.2/m5211//libgcc.a(_floatex.o)
+ .debug_line    0x00000000000010a0       0x75 /usr/local/lib/gcc/m68k-elf/4.5.2/m5211//libgcc.a(_gtdf2.o)
+ .debug_line    0x0000000000001115       0xe3 /usr/local/lib/gcc/m68k-elf/4.5.2/m5211//libgcc.a(fpgnulib.o)
+
+.debug_frame    0x0000000000000000      0x4e8
+ *(.debug_frame)
+ .debug_frame   0x0000000000000000       0x7c libs/spiUtils/spiUtils.o
+ .debug_frame   0x000000000000007c       0xa0 libs/mfprintf/mfprintf.o
+ .debug_frame   0x000000000000011c       0x7c libs/lib-iobase-evb5213/lib-iobase-evb5213.o
+ .debug_frame   0x0000000000000198       0x9c CentInertielleTest.o
+ .debug_frame   0x0000000000000234       0x44 /usr/local/m68k-elf/lib/libm.a(w_asin.o)
+ .debug_frame   0x0000000000000278       0x64 /usr/local/m68k-elf/lib/libm.a(e_asin.o)
+ .debug_frame   0x00000000000002dc       0x44 /usr/local/m68k-elf/lib/libm.a(e_sqrt.o)
+ .debug_frame   0x0000000000000320       0x30 /usr/local/m68k-elf/lib/libm.a(s_fabs.o)
+ .debug_frame   0x0000000000000350       0x30 /usr/local/m68k-elf/lib/libm.a(s_isnand.o)
+ .debug_frame   0x0000000000000380       0x2c /usr/local/m68k-elf/lib/libm.a(s_matherr.o)
+ .debug_frame   0x00000000000003ac      0x13c /usr/local/lib/gcc/m68k-elf/4.5.2/m5211//libgcc.a(fpgnulib.o)
+
+.debug_str      0x0000000000000000      0xdb0
+ *(.debug_str)
+ .debug_str     0x0000000000000000       0xf3 libs/spiUtils/spiUtils.o
+ .debug_str     0x00000000000000f3       0x12 libs/mfprintf/mfprintf.o
+ .debug_str     0x0000000000000105       0x12 libs/lib-iobase-evb5213/lib-iobase-evb5213.o
+ .debug_str     0x0000000000000117      0x1cf CentInertielleTest.o
+ .debug_str     0x00000000000002e6      0x185 /usr/local/m68k-elf/lib/libm.a(w_asin.o)
+ .debug_str     0x000000000000046b      0x16e /usr/local/m68k-elf/lib/libm.a(e_asin.o)
+ .debug_str     0x00000000000005d9      0x15b /usr/local/m68k-elf/lib/libm.a(e_sqrt.o)
+ .debug_str     0x0000000000000734      0x13d /usr/local/m68k-elf/lib/libm.a(s_fabs.o)
+ .debug_str     0x0000000000000871      0x14a /usr/local/m68k-elf/lib/libm.a(s_isnand.o)
+ .debug_str     0x00000000000009bb      0x160 /usr/local/m68k-elf/lib/libm.a(s_lib_ver.o)
+ .debug_str     0x0000000000000b1b      0x132 /usr/local/m68k-elf/lib/libm.a(s_matherr.o)
+ .debug_str     0x0000000000000c4d      0x163 /usr/local/lib/gcc/m68k-elf/4.5.2/m5211//libgcc.a(fpgnulib.o)
+
+.debug_loc      0x0000000000000000      0xda6
+ *(.debug_loc)
+ .debug_loc     0x0000000000000000       0x80 libs/spiUtils/spiUtils.o
+ .debug_loc     0x0000000000000080       0xa0 libs/mfprintf/mfprintf.o
+ .debug_loc     0x0000000000000120       0x80 libs/lib-iobase-evb5213/lib-iobase-evb5213.o
+ .debug_loc     0x00000000000001a0       0x60 CentInertielleTest.o
+ .debug_loc     0x0000000000000200       0x44 /usr/local/m68k-elf/lib/libm.a(w_asin.o)
+ .debug_loc     0x0000000000000244      0x188 /usr/local/m68k-elf/lib/libm.a(e_asin.o)
+ .debug_loc     0x00000000000003cc      0x490 /usr/local/m68k-elf/lib/libm.a(e_sqrt.o)
+ .debug_loc     0x000000000000085c       0x38 /usr/local/m68k-elf/lib/libm.a(s_fabs.o)
+ .debug_loc     0x0000000000000894       0x38 /usr/local/m68k-elf/lib/libm.a(s_isnand.o)
+ .debug_loc     0x00000000000008cc       0x20 /usr/local/m68k-elf/lib/libm.a(s_matherr.o)
+ .debug_loc     0x00000000000008ec      0x4ba /usr/local/lib/gcc/m68k-elf/4.5.2/m5211//libgcc.a(fpgnulib.o)
+
+.debug_macinfo
+ *(.debug_macinfo)
+
+.debug_weaknames
+ *(.debug_weaknames)
+
+.debug_funcnames
+ *(.debug_funcnames)
+
+.debug_typenames
+ *(.debug_typenames)
+
+.debug_varnames
+ *(.debug_varnames)
+
+.debug_pubtypes
+                0x0000000000000000       0x46
+ *(.debug_pubtypes)
+ .debug_pubtypes
+                0x0000000000000000       0x29 libs/spiUtils/spiUtils.o
+ .debug_pubtypes
+                0x0000000000000029       0x1d CentInertielleTest.o
+
+.debug_ranges   0x0000000000000000       0x70
+ *(.debug_ranges)
+ .debug_ranges  0x0000000000000000       0x40 CentInertielleTest.o
+ .debug_ranges  0x0000000000000040       0x18 /usr/local/m68k-elf/lib/libm.a(e_asin.o)
+ .debug_ranges  0x0000000000000058       0x18 /usr/local/lib/gcc/m68k-elf/4.5.2/m5211//libgcc.a(fpgnulib.o)
+
+.gnu.attributes
+ *(.gnu.attributes)
+
+/DISCARD/
+ *(.note.GNU-stack)
+ *(.gnu_debuglink)
+ *(.gnu.lto_*)
+OUTPUT(CentInertielleTest.s19 srec)

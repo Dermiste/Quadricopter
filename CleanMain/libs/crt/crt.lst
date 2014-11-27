@@ -1,0 +1,74 @@
+68K GAS  crt.s 			page 1
+
+
+   1               	/*
+   2               	#	crt.s: startup pour kit coldfire 5213 sous DBUG
+   3               	#	---------------------------------------------------------------
+   4               	*/
+   5               		.file	"crt.s"
+   6               		XDEF	start
+   7               		XDEF	_start
+   8               	.xref end, __bss_start	/* predefini par le linker, debut et fin de section BSS */
+   9               		ALIGN	4
+  10               	
+  11               	
+  12               	start:
+  13               	_start:
+  14               	
+  15 0000 4E71      	    nop                     /* Debuggers may object to starting at 0.*/
+  16               	
+  17               	/*    move.l  #(__SP_INIT),%a7	 Initialize stack pointer %a7 to value in linker command file.*/
+  18               		
+  19               	/* raz BSS section */
+  20 0002 207C 0000 		move.l #__bss_start, %a0;
+  20      0000 
+  21 0008 203C 0000 		move.l #end, %d0;
+  21      0000 
+  22               	
+  23               	clr_bss_ram:
+  24 000e B088      		cmp.l %a0, %d0
+  25 0010 6700 0008 		beq start_main
+  26 0014 4218      		clr.b (%a0)+
+  27 0016 4EFA FFF6 		jmp clr_bss_ram
+  28               	 
+  29               	start_main: 
+  30 001a 4EB9 0000 	    jsr     main
+  30      0000 
+  31               	
+  32               	/* end_main: jmp end_main */
+  33 0020 4280      	    clr.l %d0
+  34 0022 4E4F      	    trap #15    /* Retour a DBUG */
+  35               	
+  36               	#------------------------------------------------------------- .init section --
+  37               		XDEF	__init		            
+  38               	__init:			                /* Entry to ___init, called by ___init_main called above.*/
+  39               	
+  40               		# Linker places .init sections from other modules, containing
+  41               		# calls to initialize global objects, here.
+  42               	
+  43 0024 4E75      		rts			                    /* Return from ___init. */
+  44               	
+  45               	#------------------------------------------------------------- .fini section --
+  46               		XDEF	__fini
+  47               	__fini:			                /* Entry to ___fini, called by exit(). */
+  48               	
+  49               		# Linker places .fini sections from other modules, containing
+  50               		# calls to destroy global objects, here.
+  51               	
+  52 0026 4E75      		rts			                    /* Return from ___fini.*/
+68K GAS  crt.s 			page 2
+
+
+DEFINED SYMBOLS
+                            *ABS*:00000000 crt.s
+               crt.s:12     .text:00000000 start
+               crt.s:13     .text:00000000 _start
+               crt.s:23     .text:0000000e clr_bss_ram
+               crt.s:29     .text:0000001a start_main
+               crt.s:38     .text:00000024 __init
+               crt.s:47     .text:00000026 __fini
+
+UNDEFINED SYMBOLS
+__bss_start
+end
+main
