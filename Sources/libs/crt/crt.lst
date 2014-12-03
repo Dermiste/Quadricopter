@@ -1,4 +1,4 @@
-68K GAS  crt.s 			page 1
+68K GAS  libs/crt/crt.s 			page 1
 
 
    1               	/*
@@ -56,17 +56,17 @@
   50               		# calls to destroy global objects, here.
   51               	
   52 0026 4E75      		rts			                    /* Return from ___fini.*/
-68K GAS  crt.s 			page 2
+68K GAS  libs/crt/crt.s 			page 2
 
 
 DEFINED SYMBOLS
-                            *ABS*:00000000 crt.s
-               crt.s:12     .text:00000000 start
-               crt.s:13     .text:00000000 _start
-               crt.s:23     .text:0000000e clr_bss_ram
-               crt.s:29     .text:0000001a start_main
-               crt.s:38     .text:00000024 __init
-               crt.s:47     .text:00000026 __fini
+                            *ABS*:0000000000000000 crt.s
+      libs/crt/crt.s:12     .text:0000000000000000 start
+      libs/crt/crt.s:13     .text:0000000000000000 _start
+      libs/crt/crt.s:23     .text:000000000000000e clr_bss_ram
+      libs/crt/crt.s:29     .text:000000000000001a start_main
+      libs/crt/crt.s:38     .text:0000000000000024 __init
+      libs/crt/crt.s:47     .text:0000000000000026 __fini
 
 UNDEFINED SYMBOLS
 __bss_start

@@ -4,6 +4,9 @@
 
 // définitions pour les registres dont les adresses sont communes pour les deux composants
 
+#ifndef __REGISTRES_ST__
+#define __REGISTRES_ST__
+
 #define ST_WHO_AM_I		0x0F
 #define ST_CTRL_REG1	0x20
 #define ST_CTRL_REG2	0x21
@@ -53,3 +56,5 @@
 #define ST_GYRO_INT1_TSH_ZH 	0x36
 #define ST_GYRO_INT1_TSH_ZL 	0x37
 #define ST_GYRO_INT1_DURATION 	0x38
+
+#endif /* __REGISTRES_ST__ */

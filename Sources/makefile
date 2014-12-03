@@ -3,7 +3,7 @@ M52X_PATH=/usr/local/lib/gcc/m68k-elf/4.5.2
 
 GENFLAGS=-m5200 -w -gdwarf-2
 
-GCC=$(M68K_PREFIX)gcc -c $(GENFLAGS) -Wall -I. -I./libs/* 
+GCC=$(M68K_PREFIX)gcc -c $(GENFLAGS) -Wall -I. -Ilibs/* -Ilibs
 
 AR68=$(M68K_PREFIX)ar
 RANLIB68=$(M68K_PREFIX)ranlib
@@ -23,23 +23,43 @@ BINEXT=bin
 ADRMAP = -Ttext 20002000
 
 PGM = CentInertielleTest
+PGM2 = 4xCopterV1.1
+PGM3 = ReponseIndicielle
 
-OBJS = libs/spiUtils/spiUtils.o libs/crt/crt.o libs/mfprintf/mfprintf.o libs/lib-iobase-evb5213/lib-iobase-evb5213.o $(PGM).o
+OBJS = libs/crt/crt.o libs/spiUtils/spiUtils.o libs/mfprintf/mfprintf.o libs/lib-iobase-evb5213/lib-iobase-evb5213.o $(PGM3).o
+#OBJS = libs/spiUtils/spiUtils.o libs/crt/crt.o libs/mfprintf/mfprintf.o libs/lib-iobase-evb5213/lib-iobase-evb5213.o
 
+
+all: $(PGM3).s19 
 
 %.o : %.c
 	$(GCC) $*.c -o $@
-	
 
 %.o : %.s
 	$(AS68) -o $@ $*.s > $*.lst
 
+#%.s19 : %.o
+#	$(LD68) $(OBJS) $*.o -lm -lgcc --oformat srec -o $(PGM).s19 $(ADRMAP) -M > $(PGM).map
 
-$(PGM).s19: $(OBJS) 
-	$(LD68) $(OBJS) -lm -lgcc --oformat srec -o $(PGM).s19 $(ADRMAP) -M > $(PGM).map
+
+#$(PGM).s19: $(OBJS)
+#	$(LD68) $(OBJS) -lm -lgcc --oformat srec -o $(PGM).s19 $(ADRMAP) -M > $(PGM).map
+
+#$(PGM2).s19: $(OBJS)
+#	$(LD68) $(OBJS) -lm -lgcc --oformat srec -o $(PGM2).s19 $(ADRMAP) -M > $(PGM2).map
+
+$(PGM3).s19: $(OBJS)
+	$(LD68) $(OBJS) -lm -lgcc --oformat srec -o $(PGM3).s19 $(ADRMAP) -M > $(PGM3).map	
 
 clean: 
 	rm -rf *o
+	rm -rf *s19
+	rm -rf *map
+	rm -rf libs/crt/crt.o
+	rm -rf libs/mfprintf/mfprintf.o
+	rm -rf libs/spiUtils/spiUtils.o
+	rm -rf libs/lib-iobase-evb5213/lib-iobase-evb5213.o
+
 
 
 	

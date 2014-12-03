@@ -1,0 +1,64 @@
+68K GAS  launch_ITs.s 			page 1
+
+
+   1               	/* __________________________________________________________________
+   2               	 * 
+   3               	 * Fichier:	launch_ITs.s pour COBRA5272 
+   4               	 * Auteur(s):	O.L.
+   5               	 * Compagnie:	IUT1 de Grenoble, Dpt GEII2	
+   6               	 * Contenu:	Code assembleur pour appeler les fct C d'interruption
+   7               	 * Version:	1.0
+   8               	 * Date:	02/03/07
+   9               	 * __________________________________________________________________
+  10               	 * CHANGEMENTS
+  11               	 *
+  12               	 * 14/10/14	V.G. : Adaptation pour INT1
+  13               	 * __________________________________________________________________
+  14               	 *
+  15               	 * Quand l'interruption survient et qu'elle est autorisee, ce bout
+  16               	 * de code assembleur est execute. Il sauve le contexte, appelle
+  17               	 * la routine d'interruption C ActionINT1(), restore le contexte et
+  18               	 * retourne au main() grace a 'rte'.
+  19               	 * __________________________________________________________________
+  20               	 */
+  21               	
+  22               	.global isrINT1		| Pour que cette etiquette soit vu par le linker
+  23               	.extern actionINT1	| Pour pouvoir appeler cette fct C depuis l asm 
+  24               	
+  25               	/* ----------------------------------------- */
+  26               	/* --- Section du code et des constantes --- */
+  27               	/* ----------------------------------------- */
+  28               	.text
+  29               	
+  30               	isrINT1:	
+  31               	| Sauvegarde du contexte integral pour appel de la fonction C
+  32 0000 9FFC 0000 	                sub.l		#4*15, %A7
+  32      003C 
+  33 0006 48D7 7FFF 			movem.l		%D0-%D7/%A0-%A6,(%A7)
+  34               	
+  35               	| Appel de la fonction C de traitement de l'interruption
+  36 000a 4EB9 0000 			jsr		actionINT1
+  36      0000 
+  37               			
+  38               	| Restauration du contexte integral
+  39 0010 4CD7 7FFF 			movem.l		(%sp),%d0-%d7/%a0-%a6
+  40 0014 DFFC 0000 			add.l		 #4*15, %A7
+  40      003C 
+  41               			
+  42               	| Retour d'interruption
+  43 001a 4E73      			rte
+  44               	
+  45               	/* ------------------------------------------- */
+  46               	/* --- On peut ajouter d autres fcts d ITs --- */
+  47               	/* ------------------------------------------- */
+  48               	
+  49               	
+  50               	.end
+68K GAS  launch_ITs.s 			page 2
+
+
+DEFINED SYMBOLS
+        launch_ITs.s:30     .text:0000000000000000 isrINT1
+
+UNDEFINED SYMBOLS
+actionINT1

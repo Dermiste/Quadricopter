@@ -9,10 +9,11 @@ Version : 1.0 - 25-06-2013
 
 #include "stdio.h"
 #include "main.h"
+
 #include "libs/spiUtils/spiUtils.h"
 #include "libs/mcf5213/mcf5213.h"
-#include <math.h>
 
+#include <math.h>
 
 
 #define WHO_AM_I 0x0F
@@ -41,6 +42,14 @@ Version : 1.0 - 25-06-2013
 #define	CSA_ON MCF_GPIO_CLRQS=0xEF 		// Activation du CS Acc
 #define	CSA_OFF MCF_GPIO_SETQS=0x10		// DeActivation du CS Acc
 
+//Macros pour SPI	
+//CS Gyro sur PUA3
+//#define	CSG_ON MCF_GPIO_CLRUA=0xF7 		// Activation du CS gyro
+//#define	CSG_OFF MCF_GPIO_SETUA=0x08 	// DeActivation du CS gyro
+//CS Acc sur PQS4
+//#define	CSA_ON MCF_GPIO_CLRQS=0xEF 		// Activation du CS Acc
+//#define	CSA_OFF MCF_GPIO_SETQS=0x10		// DeActivation du CS Acc
+
 //Variables globales
 char tabInertie[9];
 	//contenu tabInertie : ThetaX, ThetaY, AccZ, dThetaX,dThetaY,dThetaZ,D²ThetaX,d²ThetaY,d²ThetaZ
@@ -52,12 +61,8 @@ int totalData = 10;
 int dataTraced = 0;
 
 
-void Init_spi (void);
-char Init_AccGyro (void);
-void SpiWrite8 (unsigned char ad, unsigned char datawrite);
-void SpiRead6R(char* buffer);
-char SpiRead8 (unsigned char ad);
 void GetInertie(void);
+
 
 void GetInertie(void)
 {
@@ -118,11 +123,11 @@ int main (void)
 	char temp;
 	unsigned int i;
 	
-	//printf("Test Centrale inertielle\n");
+	printf("Test Centrale inertielle\n");
 	
 	Init_spi();			//init IOs liees au bus SPI
 	if(Init_AccGyro()!=0)	//Init des composants
-		//printf("Erreur d'init Acc ou Gyro\n");
+		printf("Erreur d'init Acc ou Gyro\n");
 	//RAZ de tabInertieOld pour premier calcul de derivee
 	for(i=0;i<6;i++)
 		bufGyroOld[i]=0;
@@ -131,8 +136,8 @@ int main (void)
 	CSG_ON;
 	temp=SpiRead8(OUT_TEMP);
 	CSG_OFF;
-	//printf("TempGyro=%d\n",temp );
-	//printf("taper touche\n\n");
+	printf("TempGyro=%d\n",temp );
+	printf("taper touche\n\n");
 	getch();
 	
 	while(1)
@@ -172,6 +177,7 @@ int main (void)
 		//{}
 		
 	
+
 		char choix, i;
 		if (kbhit())
 			{
@@ -220,7 +226,7 @@ int main (void)
 }
 
 //*****FONCTIONS DE GESTION DU DIALOGUE SPI*****//
-char Init_AccGyro (void)
+/*char Init_AccGyro (void)
 {
 	unsigned char gyro_value, acc_value;
 //config Gyro CTRL_REG1:
@@ -266,4 +272,4 @@ char Init_AccGyro (void)
 	if ((acc_value != 0x32) || (gyro_value !=0xd3))
 		return(-1);
 	else return(0);
-}
+}*/

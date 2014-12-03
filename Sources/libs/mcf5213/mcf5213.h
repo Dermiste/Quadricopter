@@ -11,6 +11,10 @@ typedef volatile unsigned char      vuint8;
 typedef volatile unsigned short int vuint16;
 typedef volatile unsigned long int  vuint32;
 
+#define io_8(addr)        *((volatile vuint8 *)(addr))
+#define io_16(addr)       *((volatile vuint16 *)(addr))
+#define io_32(addr)       *((volatile vuint32 *)(addr))
+
 #include "mcf5213_scm.h"
 #include "mcf5213_pmm.h"
 #include "mcf5213_dma.h"
