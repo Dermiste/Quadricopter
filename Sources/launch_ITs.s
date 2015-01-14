@@ -19,21 +19,21 @@
  * __________________________________________________________________
  */
 
-.global isrINT1		| Pour que cette etiquette soit vu par le linker
-.extern actionINT1	| Pour pouvoir appeler cette fct C depuis l asm 
+.global isrINT0		| Pour que cette etiquette soit vu par le linker
+.extern actionINT0	| Pour pouvoir appeler cette fct C depuis l asm 
 
 /* ----------------------------------------- */
 /* --- Section du code et des constantes --- */
 /* ----------------------------------------- */
 .text
 
-isrINT1:	
+isrINT0:	
 | Sauvegarde du contexte integral pour appel de la fonction C
-                sub.l		#4*15, %A7
+        sub.l		#4*15, %A7
 		movem.l		%D0-%D7/%A0-%A6,(%A7)
 
 | Appel de la fonction C de traitement de l'interruption
-		jsr		actionINT1
+		jsr		actionINT0
 		
 | Restauration du contexte integral
 		movem.l		(%sp),%d0-%d7/%a0-%a6

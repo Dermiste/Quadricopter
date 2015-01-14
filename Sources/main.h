@@ -9,10 +9,7 @@
 #define RAMBAR 0xC05
 #define VBR 0x801
 
-
 /* --- Prototype des fonctions des modules --- */
-
-
 
 /* Module Alim */
 
@@ -23,8 +20,6 @@ extern void batterie(void);
 
 void init_asservissement(void); // Permet l'installation du vecteur d'interruption
 extern void asservissement(void); // Asservissement numérique par interruptions venant de TMR0.
-
-
 
 //A définir
 

@@ -31,8 +31,10 @@ Version :	1.0 - 27-06-2013 Tests de base
 // moteur3 PWMDTY5
 // moteur4 PWMDTY1
 
-extern void isrINT1(void);
-#define ADR_VECT_INT1 0x118
+#define NVECT_TMR0 (64 + 19)
+#define ADR_VECT_INT0 (0x20000000 + NVECT_TMR0*4)
+
+extern void isrINT0(void);
 
 //Variables globales
 char tabInertie[9];
@@ -56,15 +58,57 @@ int sat(int value, int min, int max);
 void Init_5213(void);
 void Init_PWM (void);
 
-void actionINT1(void) {
+void actionINT0(void) {
 	//unsigned int ii;
 	
 	nirq++;
-	printf("Occurence num. %d de TIMER1 ", nirq);
+	printf("Occurence num. %d de TIMER1 \n", nirq);
 
 	// Acquittement de l'interruption
-	io_8(MCF_DTIM1_DTER) = 3;
+	MCF_DTIM0_DTER = MCF_DTIM_DTER_REF | MCF_DTIM_DTER_CAP;
 }
+
+/*int main(void){
+	printf("Starting ...:\n");
+
+	char choix = 0;
+
+	MCF_DTIM0_DTMR=0x501B; //RAZ auto, pas de prediv 16, IT
+	MCF_DTIM0_DTRR=19999; //Registre Reference pour 100Hz
+	MCF_DTIM0_DTCN=0; //RAZ registre Compteur
+	MCF_DTIM0_DTER=0x03; //RAZ registre Drapeaux
+
+	//MCF_INTC_ICR19 = 0x28;
+	MCF_INTC_ICR19 = MCF_INTC_ICR_IL(0x5);
+	
+	MCF_INTC_IMRL = MCF_INTC_IMRL & ~(MCF_INTC_IMRL_MASK19);
+	//MCF_INTC_IMRL = 0xfff7ffff;
+	io_32(ADR_VECT_INT0) = (long)isrINT0; // Chargement du vecteur d'interruption dans la table
+	__asm("move.w #0x2500,%sr\n");	 // Initialisation a 2 du masque de priorite d'interruption dans le registre d'etat	
+	
+	while(1){
+		if (kbhit())
+		{
+			choix = getch();	//lire derniere touche appuyee
+			switch (choix)
+			{
+			case 'a':
+				__asm("move.w #0x2200,%sr\n");
+				break;
+			case 'b':
+				__asm("move.w #0x2500,%sr\n");
+				break;				
+			case (27):
+				printf("Quitting with %d ...:\n",choix);
+				return(0);
+				break;
+			default:
+				break;
+			}
+		}
+	}
+
+}*/
 
 int main (void)
 {	
@@ -110,7 +154,7 @@ int main (void)
 		
 //lecture temp sur Gyro :	
 	CSG_ON;
-	temp=SpiRead8(OUT_TEMP);
+	temp=SpiRead8(ST_GYRO_OUT_TEMP);
 	CSG_OFF;
 	//printf("TempGyro=%d\n",temp );
 	//printf("taper touche\n");
@@ -123,7 +167,7 @@ int main (void)
 			printf("Ech rate!!\n");	
 		while ((MCF_DTIM3_DTER & 2)==0);//attend prochain date ech
 		MCF_DTIM3_DTER = 2;				//RAZ Flag
-		
+
 		GetInertie();	//retourne dans tabInertie les valeurs
 		
 		//fenêtre de moyennage sur 8 echantillons pour l'assiette
@@ -173,8 +217,8 @@ int main (void)
 		//moteur droit : tete axe Y, PWM1
         //moteur4 = /*anc M4(int)(-r_roll + r_yaw)*/  gas + ( control_r - control_y );// - (int)control_x;
 
-        moteur1 = initialThurst;
-		moteur2 = initialThurst;
+        //moteur1 = initialThurst;
+		//moteur2 = initialThurst;
 	//	PWMot1 = (unsigned char)sat(moteur1+110,100,180);
 	//	PWMot2 = (unsigned char)sat(moteur2+110,100,180);
 	//	PWMot3 = (unsigned char)sat(moteur3+110,100,180);
@@ -208,15 +252,15 @@ int main (void)
 				switch (choix)
 				{
 				case '+':
-					if (initialThurst < 200) initialThurst+=5;
+					//if (initialThurst < 200) initialThurst+=5;
 					printf("initialThurst=%d\n",initialThurst);
 					break;
 				case '-':
-					if (initialThurst > 120) initialThurst-=5;
+					//if (initialThurst > 120) initialThurst-=5;
 					printf("initialThurst=%d\n",initialThurst);
 					break;
 				case 's':
-					initialThurst = 110;
+					//initialThurst = 110;
 					printf("Setting motors to initial value %d \n",initialThurst);
 					break;
 				/*case 'V':
@@ -306,25 +350,29 @@ void Init_5213(void)
 	MCF_GPIO_PUAPAR &= 0x3F;	// Port UCTS0 en GPIO pour le CS du gyro
 	MCF_GPIO_PQSPAR = 0x0015;	//QS4 GPIO(CS Acc), QS3..1 en primary pour SPI	
 
-//Config Timer1 pour temporiser les échelons à 0.2s
-	//division par 80 par prediv puis ref=20000 => 100HZ
-	//MCF_DTIM1_DTMR=0x501A; //RAZ auto, pas de prediv 16, IT
-	//MCF_DTIM1_DTRR=19999; //Registre Reference pour 100Hz
-	//MCF_DTIM1_DTCN=0; //RAZ registre Compteur
-	//MCF_DTIM1_DTER=0x03; //RAZ registre Drapeaux
+	//Config Timer0 pour temporiser les échelons à 0.2s
+	MCF_DTIM0_DTMR=0x501B; //RAZ auto, pas de prediv 16, IT
+	MCF_DTIM0_DTRR=19999; //Registre Reference pour 100Hz
+	MCF_DTIM0_DTCN=0; //RAZ registre Compteur
+	MCF_DTIM0_DTER=0x03; //RAZ registre Drapeaux
 
 	//MCF_INTC_ICR1 = 0xB0000000;
-	//io_32(ADR_VECT_INT1) = (long)isrINT1; // Chargement du vecteur d'interruption dans la table
-	//__asm("move.w #0x2200,%sr\n");	 // Initialisation a 2 du masque de priorite d'interruption dans le registre d'etat	
-
-//Config Timer3 pour echantillonage 100Hz A PARTIR DE CLK+80MHZ
+	//MCF_INTC_ICR19 = MCF_INTC_ICR_IL(0x4);
+	MCF_INTC_ICR19 = MCF_INTC_ICR_IL(0x5);
+	MCF_INTC_IMRL = MCF_INTC_IMRL & ~(MCF_INTC_IMRL_MASK19);
+	//MCF_INTC_ICR44 = MCF_INTC_ICR_IP(0x7);
+	io_32(ADR_VECT_INT0) = (long)isrINT0; // Chargement du vecteur d'interruption dans la table
+	__asm("move.w #0x2200,%sr\n");	 // Initialisation a 2 du masque de priorite d'interruption dans le registre d'etat	
+	
+	//MCF_INTC_ICR_IL
+	//Config Timer3 pour echantillonage 100Hz A PARTIR DE CLK+80MHZ
 	//division par 80 par prediv puis ref=10000 => 100HZ
 	MCF_DTIM3_DTMR=0x500B; //RAZ auto, pas de prediv 16, pas d'IT
 	MCF_DTIM3_DTRR=9999; //Registre Reference pour 100Hz
 	MCF_DTIM3_DTCN=0; //RAZ registre Compteur
 	MCF_DTIM3_DTER=0x03; //RAZ registre Drapeaux	
 	
-//Proprietes du transfert SPI
+	//Proprietes du transfert SPI
 	MCF_QSPI_QMR = 0xA308;		//tfert 8 bits, CPOL=1, CPHA=1 fclk=1Mhz
 	MCF_QSPI_QDLYR = 0x0000;   	//Activation du  bus SPI   //////>>   pour init un transfert mettre 0x8000
 	MCF_QSPI_QWR = 0x0000;     	//Pointeurs de la RAM (FIFO limitee a un mot)    
@@ -332,21 +380,21 @@ void Init_5213(void)
 	MCF_QSPI_QAR = 0x0020;		//selection RAM de commande
 	MCF_QSPI_QDR = 0x0E00;		// A  defaut
 	
-// init des CS Gyro et accelero	
+	// init des CS Gyro et accelero	
 	MCF_GPIO_DDRUA|=0x08;		// CS du gyro mis en sortie
 	MCF_GPIO_SETUA=0x08;		// mise à niveau haut du CS gyro
 	MCF_GPIO_DDRQS|=0x10;		// CS de l'accéléro mis en sortie
 	MCF_GPIO_SETQS=0x10;		// mise à niveau haut du CS acc
 }	
 
-int sat(int value, int min, int max)
+/*int sat(int value, int min, int max)
 {
 	int retour;
 	if (value>max)	retour=max;
 	else if (value < min) retour=min;
 		 else retour=value;
 	return (retour);
-}
+}*/
 
 void GetInertie(void)
 {
@@ -398,7 +446,6 @@ void GetInertie(void)
 	bufGyroOld[1]=bufGyro[1];
 	bufGyroOld[3]=bufGyro[3];
 	bufGyroOld[5]=bufGyro[5];
-	
-
 }
+
 

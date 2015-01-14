@@ -28,40 +28,40 @@ char Init_AccGyro (void)
 	//ODR=400Hz, Cut-off=110Hz => DR+BW="1011"
 	//Tous les axes activés : PD=1, Zen=1, Yen=1, Xen=1
 	CSG_ON;
-	SpiWrite8(CTRL_REG1,0xBF);//0b1011.1111
+	SpiWrite8(ST_CTRL_REG1,0xBF);//0b1011.1111
 	CSG_OFF;
 	
 	//CTRLREG2:
 	//normal mode :0000
 	//filtre passe haut =0,1Hz, avec ODR400Hz : 1000
 	CSG_ON;
-	SpiWrite8(CTRL_REG2,0x08);
+	SpiWrite8(ST_CTRL_REG2,0x08);
 	CSG_OFF;
 	
 	//CTRLREG3 : config defaut =0
 	//CTRLREG4 : config FS1-FS0 =01 pour sensibilite=500deg/s (=> Quantum=17,5mdps)
 	CSG_ON;
-	SpiWrite8(CTRL_REG4,0x10);
+	SpiWrite8(ST_CTRL_REG4,0x10);
 	CSG_OFF;
 	
 	//CTRLREG5 : HPF ?
 	CSG_ON;
-	SpiWrite8(CTRL_REG5,0x00);//HPF enable : 0x10 
+	SpiWrite8(ST_CTRL_REG5,0x00);//HPF enable : 0x10 
 	CSG_OFF;
 	
 //Config Acc CTRL_REG1:
 	CSA_ON;
-	SpiWrite8(CTRL_REG1,0x37);	//Mode normal, data rate 400Hz, en all axis
+	SpiWrite8(ST_CTRL_REG1,0x37);	//Mode normal, data rate 400Hz, en all axis
 	CSA_OFF;
 	//CTRL_REG2 : default value : Filters bypass
 	//CTRLREG3: default VAlue, pas d'ITS
 	//CTRLREG4 : default value : full scale =+-2g, /!\ continuous update MSB LSB
 	//CTRLREG5 : default value : sleep to wake disabled
 	CSA_ON;
-	acc_value=SpiRead8(WHO_AM_I);
+	acc_value=SpiRead8(ST_WHO_AM_I);
 	CSA_OFF;
 	CSG_ON;
-	gyro_value=SpiRead8(WHO_AM_I);
+	gyro_value=SpiRead8(ST_WHO_AM_I);
 	CSG_OFF;
 	//printf("Who am I ACC=%d\tWho am I Gyro=%d\n",acc_value,gyro_value);
 	if ((acc_value != 0x32) || (gyro_value !=0xd3))
@@ -91,7 +91,7 @@ void SpiRead6R(char* buffer)
 	MCF_QSPI_QIR = 0xD00D;	//RAZ SPIF
 	//Transfert du premier mot = code fonction
 	MCF_QSPI_QAR = 0x0000;			//On se place au niveau de l'envoi dans la RAM : transmit RAM
-	MCF_QSPI_QDR = OUT_X_L | 0xC0; 	//On envoie le code fonction (8 bits) avec mise a 1 bit R/W et M/S
+	MCF_QSPI_QDR = ST_OUT_X_L | 0xC0; 	//On envoie le code fonction (8 bits) avec mise a 1 bit R/W et M/S
 	MCF_QSPI_QDLYR = 0x8000; 		//On init le transfert (en=1)	
 	while((MCF_QSPI_QIR & MCF_QSPI_QIR_SPIF)==0); 	//On verifie qu'il est termine
 	for(reg=0;reg<6;reg++)	//parcourir les 6 registres de donnees d'axes

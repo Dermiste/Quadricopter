@@ -26,7 +26,7 @@ PGM = CentInertielleTest
 PGM2 = 4xCopterV1.1
 PGM3 = ReponseIndicielle
 
-OBJS = libs/crt/crt.o libs/spiUtils/spiUtils.o libs/mfprintf/mfprintf.o libs/lib-iobase-evb5213/lib-iobase-evb5213.o $(PGM3).o
+OBJS = libs/crt/crt.o launch_ITs.o libs/spiUtils/spiUtils.o libs/imuUtils/imuUtils.o libs/mfprintf/mfprintf.o libs/lib-iobase-evb5213/lib-iobase-evb5213.o $(PGM3).o
 #OBJS = libs/spiUtils/spiUtils.o libs/crt/crt.o libs/mfprintf/mfprintf.o libs/lib-iobase-evb5213/lib-iobase-evb5213.o
 
 

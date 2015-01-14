@@ -22,22 +22,22 @@
   19               	 * __________________________________________________________________
   20               	 */
   21               	
-  22               	.global isrINT1		| Pour que cette etiquette soit vu par le linker
-  23               	.extern actionINT1	| Pour pouvoir appeler cette fct C depuis l asm 
+  22               	.global isrINT0		| Pour que cette etiquette soit vu par le linker
+  23               	.extern actionINT0	| Pour pouvoir appeler cette fct C depuis l asm 
   24               	
   25               	/* ----------------------------------------- */
   26               	/* --- Section du code et des constantes --- */
   27               	/* ----------------------------------------- */
   28               	.text
   29               	
-  30               	isrINT1:	
+  30               	isrINT0:	
   31               	| Sauvegarde du contexte integral pour appel de la fonction C
-  32 0000 9FFC 0000 	                sub.l		#4*15, %A7
+  32 0000 9FFC 0000 	        sub.l		#4*15, %A7
   32      003C 
   33 0006 48D7 7FFF 			movem.l		%D0-%D7/%A0-%A6,(%A7)
   34               	
   35               	| Appel de la fonction C de traitement de l'interruption
-  36 000a 4EB9 0000 			jsr		actionINT1
+  36 000a 4EB9 0000 			jsr		actionINT0
   36      0000 
   37               			
   38               	| Restauration du contexte integral
@@ -58,7 +58,7 @@
 
 
 DEFINED SYMBOLS
-        launch_ITs.s:30     .text:0000000000000000 isrINT1
+        launch_ITs.s:30     .text:0000000000000000 isrINT0
 
 UNDEFINED SYMBOLS
-actionINT1
+actionINT0
