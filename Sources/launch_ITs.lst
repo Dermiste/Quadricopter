@@ -25,40 +25,67 @@
   22               	.global isrINT0		| Pour que cette etiquette soit vu par le linker
   23               	.extern actionINT0	| Pour pouvoir appeler cette fct C depuis l asm 
   24               	
-  25               	/* ----------------------------------------- */
-  26               	/* --- Section du code et des constantes --- */
-  27               	/* ----------------------------------------- */
-  28               	.text
-  29               	
-  30               	isrINT0:	
-  31               	| Sauvegarde du contexte integral pour appel de la fonction C
-  32 0000 9FFC 0000 	        sub.l		#4*15, %A7
-  32      003C 
-  33 0006 48D7 7FFF 			movem.l		%D0-%D7/%A0-%A6,(%A7)
-  34               	
-  35               	| Appel de la fonction C de traitement de l'interruption
-  36 000a 4EB9 0000 			jsr		actionINT0
-  36      0000 
-  37               			
-  38               	| Restauration du contexte integral
-  39 0010 4CD7 7FFF 			movem.l		(%sp),%d0-%d7/%a0-%a6
-  40 0014 DFFC 0000 			add.l		 #4*15, %A7
-  40      003C 
+  25               	
+  26               	.global isrINT2		| Pour que cette etiquette soit vu par le linker
+  27               	.extern actionINT2	| Pour pouvoir appeler cette fct C depuis l asm 
+  28               	
+  29               	/* ----------------------------------------- */
+  30               	/* --- Section du code et des constantes --- */
+  31               	/* ----------------------------------------- */
+  32               	.text
+  33               	
+  34               	isrINT0:	
+  35               	| Sauvegarde du contexte integral pour appel de la fonction C
+  36 0000 9FFC 0000 	        sub.l		#4*15, %A7
+  36      003C 
+  37 0006 48D7 7FFF 			movem.l		%D0-%D7/%A0-%A6,(%A7)
+  38               	
+  39               	| Appel de la fonction C de traitement de l'interruption
+  40 000a 4EB9 0000 			jsr		actionINT0
+  40      0000 
   41               			
-  42               	| Retour d'interruption
-  43 001a 4E73      			rte
-  44               	
-  45               	/* ------------------------------------------- */
-  46               	/* --- On peut ajouter d autres fcts d ITs --- */
-  47               	/* ------------------------------------------- */
+  42               	| Restauration du contexte integral
+  43 0010 4CD7 7FFF 			movem.l		(%sp),%d0-%d7/%a0-%a6
+  44 0014 DFFC 0000 			add.l		 #4*15, %A7
+  44      003C 
+  45               			
+  46               	| Retour d'interruption
+  47 001a 4E73      			rte
   48               	
-  49               	
-  50               	.end
+  49               	isrINT2:	
+  50               	| Sauvegarde du contexte integral pour appel de la fonction C
+  51 001c 9FFC 0000 	        sub.l		#4*15, %A7
+  51      003C 
+  52 0022 48D7 7FFF 			movem.l		%D0-%D7/%A0-%A6,(%A7)
+  53               	
 68K GAS  launch_ITs.s 			page 2
 
 
+  54               	| Appel de la fonction C de traitement de l'interruption
+  55 0026 4EB9 0000 			jsr		actionINT2
+  55      0000 
+  56               			
+  57               	| Restauration du contexte integral
+  58 002c 4CD7 7FFF 			movem.l		(%sp),%d0-%d7/%a0-%a6
+  59 0030 DFFC 0000 			add.l		 #4*15, %A7
+  59      003C 
+  60               			
+  61               	| Retour d'interruption
+  62 0036 4E73      			rte		
+  63               	
+  64               	/* ------------------------------------------- */
+  65               	/* --- On peut ajouter d autres fcts d ITs --- */
+  66               	/* ------------------------------------------- */
+  67               	
+  68               	
+  69               	.end
+68K GAS  launch_ITs.s 			page 3
+
+
 DEFINED SYMBOLS
-        launch_ITs.s:30     .text:0000000000000000 isrINT0
+        launch_ITs.s:34     .text:0000000000000000 isrINT0
+        launch_ITs.s:49     .text:000000000000001c isrINT2
 
 UNDEFINED SYMBOLS
 actionINT0
+actionINT2

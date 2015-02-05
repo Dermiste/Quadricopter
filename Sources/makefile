@@ -25,12 +25,15 @@ ADRMAP = -Ttext 20002000
 PGM = CentInertielleTest
 PGM2 = 4xCopterV1.1
 PGM3 = ReponseIndicielle
+PGM4 = UARTDev
 
-OBJS = libs/crt/crt.o launch_ITs.o libs/spiUtils/spiUtils.o libs/imuUtils/imuUtils.o libs/mfprintf/mfprintf.o libs/lib-iobase-evb5213/lib-iobase-evb5213.o $(PGM3).o
-#OBJS = libs/spiUtils/spiUtils.o libs/crt/crt.o libs/mfprintf/mfprintf.o libs/lib-iobase-evb5213/lib-iobase-evb5213.o
+PGMs = ReponseIndicielle
 
+OBJS = libs/crt/crt.o launch_ITs.o libs/spiUtils/spiUtils.o libs/imuUtils/imuUtils.o libs/mfprintf/mfprintf.o libs/lib-iobase-evb5213/lib-iobase-evb5213.o
 
-all: $(PGM3).s19 
+.PRECIOUS: $(OBJS)
+
+all: $(PGMs:=.s19)
 
 %.o : %.c
 	$(GCC) $*.c -o $@
@@ -38,25 +41,17 @@ all: $(PGM3).s19
 %.o : %.s
 	$(AS68) -o $@ $*.s > $*.lst
 
-#%.s19 : %.o
-#	$(LD68) $(OBJS) $*.o -lm -lgcc --oformat srec -o $(PGM).s19 $(ADRMAP) -M > $(PGM).map
-
-
-#$(PGM).s19: $(OBJS)
-#	$(LD68) $(OBJS) -lm -lgcc --oformat srec -o $(PGM).s19 $(ADRMAP) -M > $(PGM).map
-
-#$(PGM2).s19: $(OBJS)
-#	$(LD68) $(OBJS) -lm -lgcc --oformat srec -o $(PGM2).s19 $(ADRMAP) -M > $(PGM2).map
-
-$(PGM3).s19: $(OBJS)
-	$(LD68) $(OBJS) -lm -lgcc --oformat srec -o $(PGM3).s19 $(ADRMAP) -M > $(PGM3).map	
+%.s19: $(OBJS) %.o 
+	$(LD68) $(OBJS) $*.o -lm -lgcc --oformat srec -o $*.s19 $(ADRMAP) -M > $*.map		
 
 clean: 
 	rm -rf *o
 	rm -rf *s19
 	rm -rf *map
+	rm -rf libs/filters/AccFilter.o
 	rm -rf libs/crt/crt.o
 	rm -rf libs/mfprintf/mfprintf.o
+	rm -rf libs/spiUtils/imuUtils.o
 	rm -rf libs/spiUtils/spiUtils.o
 	rm -rf libs/lib-iobase-evb5213/lib-iobase-evb5213.o
 

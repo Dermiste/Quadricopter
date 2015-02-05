@@ -9,7 +9,7 @@ int sat(int value, int min, int max)
 	return (retour);
 }
 
-void getInertie(char tabInertie[], char bufGyroOld[])
+void _getInertie(char tabInertie[], char bufGyroOld[])
 {
 	char bufAcc[6],bufGyro[6];
 
@@ -37,8 +37,8 @@ void getInertie(char tabInertie[], char bufGyroOld[])
 	if(bufAcc[3]>64) bufAcc[3]=64;	//tronquer AccY à +-1g pour calcul assiette
 	else if (bufAcc[3]<-64) bufAcc[3]=-64;
 
-	floatX = asin(bufAcc[1]/64.0);
-	floatY = asin(bufAcc[3]/64.0);
+	//floatX = asin(bufAcc[1]/64.0);
+	//floatY = asin(bufAcc[3]/64.0);
 
 	tabInertie[0] = (char)(floatX*180/PI);//	-90<result<90 
 	tabInertie[1] = (char)(floatY*180/PI);//	-90<result<90 

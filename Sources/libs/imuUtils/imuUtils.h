@@ -14,6 +14,6 @@
 #define PI 3.141592654
 
 int sat(int value, int min, int max);
-void getInertie(char tabInertie[], char bufGyroOld[]);
+void _getInertie(char tabInertie[], char bufGyroOld[]);
 
 #endif /* __IMU_UTILS__ */

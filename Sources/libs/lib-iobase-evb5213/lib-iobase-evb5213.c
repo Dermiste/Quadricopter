@@ -4,6 +4,7 @@
 
 
 void out_char(int ch);
+void out_byte(int ch);
 
 /*****************/
 int kbhit( void )
@@ -38,6 +39,16 @@ void out_char(int ch)
     if ( ch == '\n')
         out_char('\r');
 
+	/* Wait until space is available in the FIFO */
+	while (!(MCF_UART0_USR & MCF_UART_USR_TXRDY));
+
+	/* Send the character */
+	MCF_UART0_UTB = ch;
+}
+
+
+void out_byte(int ch)
+{
 	/* Wait until space is available in the FIFO */
 	while (!(MCF_UART0_USR & MCF_UART_USR_TXRDY));
 

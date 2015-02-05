@@ -8,6 +8,7 @@ Version :	1.0 - 27-06-2013 Tests de base
 
 #include "stdio.h"
 #include "main.h"
+#include "libs/filters/AccFilter.h"
 #include "libs/spiUtils/spiUtils.h"
 #include "libs/mcf5213/mcf5213.h"
 #include <math.h>
@@ -22,9 +23,12 @@ Version :	1.0 - 27-06-2013 Tests de base
 #define AAY tabInertie[7]
 #define AAZ tabInertie[8]
 
-
-
+#define ACCELEROMETER_SENSITIVITY 32.0 // 32.0 - 8192
+#define GYROSCOPE_SENSITIVITY 17.5			
+			
 #define PI 3.141592654
+#define M_PI 3.141592654
+#define dt 0.01
 
 // moteur1 PWMDTY7
 // moteur2 PWMDTY3
@@ -32,100 +36,101 @@ Version :	1.0 - 27-06-2013 Tests de base
 // moteur4 PWMDTY1
 
 #define NVECT_TMR0 (64 + 19)
+#define NVECT_TMR2 (64 + 21)
 #define ADR_VECT_INT0 (0x20000000 + NVECT_TMR0*4)
+#define ADR_VECT_INT2 (0x20000000 + NVECT_TMR2*4)
 
 extern void isrINT0(void);
+extern void isrINT2(void);
 
 //Variables globales
 char tabInertie[9];
 	//contenu tabInertie : ThetaX, ThetaY, AccZ, dThetaX,dThetaY,dThetaZ,D²ThetaX,d²ThetaY,d²ThetaZ
 char bufGyroOld[6];	//pour calcul derivee vitesse angulaire (acceleration angulaire)
-char tabMoyAX[64];	//moyenner mesure d'assiette
-char tabMoyAY[64];
-char *pTabmoyAX,*pTabmoyAY;
+
+char gyrData[3];
+char accData[3];
 
 
 int __errno=0;	//pour gestion messages d'erreur des fcts asin, acos de libm.a
-int control_r=0,control_p=0,control_y=0;
+signed int control_r=0,control_p=0,control_y=0;
 int GvX,GvY,GvZ,GaX,GaY,IGpX,IGpY;	//gains asservissement
 int SumAY=0,SumAX=0;	//moyennage Angles
 char MoyAX,MoyAY;	//Angles moyennes
 int nirq = 0;
-int moteur1,moteur2,moteur3,moteur4;
+signed int moteur1,moteur2,moteur3,moteur4;
 unsigned char PWMot1,PWMot2,PWMot3,PWMot4;
 
-int sat(int value, int min, int max);
+unsigned long timeClock,startTime = 0;
+unsigned int initialThurst = 0;
+int thrustOffset = 0;
+int totalSample = 0;
+unsigned int testMode = 0,shouldFinishTest = 0;
+
+
 void Init_5213(void);
 void Init_PWM (void);
+void ComplementaryFilter(char accData[3], char gyrData[3], double *pitch, double *roll);
+
+void GetInertie(void);
+
+double pitch = 0,roll = 0;
+signed int targetPitch = 0, targetRoll = 0;
+signed int errorPitch = 0, errorRoll = 0;
+
+char controlActivated = 0;
+
+double compFilterCoef = 0.02;
+
+//double PID
 
 void actionINT0(void) {
 	//unsigned int ii;
-	
 	nirq++;
-	printf("Occurence num. %d de TIMER1 \n", nirq);
+	switch(nirq){
+		case 1:
+			initialThurst = 0;
+		break;
+
+		/*case 100:
+			thrustOffset = 5;
+		break;*/
+
+		case 100:
+			initialThurst = 120;
+			//thrustOffset = 5;
+		break;
+
+		case 350:
+			//stopTest();
+			thrustOffset = 0;
+			initialThurst = 0;
+			MCF_DTIM0_DTMR=0x500B;
+			nirq = 0;
+			shouldFinishTest = 1;
+		break;
+	}	//printf("Occurence num. %d de TIMER1 \n", nirq);
 
 	// Acquittement de l'interruption
 	MCF_DTIM0_DTER = MCF_DTIM_DTER_REF | MCF_DTIM_DTER_CAP;
 }
 
-/*int main(void){
-	printf("Starting ...:\n");
-
-	char choix = 0;
-
-	MCF_DTIM0_DTMR=0x501B; //RAZ auto, pas de prediv 16, IT
-	MCF_DTIM0_DTRR=19999; //Registre Reference pour 100Hz
-	MCF_DTIM0_DTCN=0; //RAZ registre Compteur
-	MCF_DTIM0_DTER=0x03; //RAZ registre Drapeaux
-
-	//MCF_INTC_ICR19 = 0x28;
-	MCF_INTC_ICR19 = MCF_INTC_ICR_IL(0x5);
-	
-	MCF_INTC_IMRL = MCF_INTC_IMRL & ~(MCF_INTC_IMRL_MASK19);
-	//MCF_INTC_IMRL = 0xfff7ffff;
-	io_32(ADR_VECT_INT0) = (long)isrINT0; // Chargement du vecteur d'interruption dans la table
-	__asm("move.w #0x2500,%sr\n");	 // Initialisation a 2 du masque de priorite d'interruption dans le registre d'etat	
-	
-	while(1){
-		if (kbhit())
-		{
-			choix = getch();	//lire derniere touche appuyee
-			switch (choix)
-			{
-			case 'a':
-				__asm("move.w #0x2200,%sr\n");
-				break;
-			case 'b':
-				__asm("move.w #0x2500,%sr\n");
-				break;				
-			case (27):
-				printf("Quitting with %d ...:\n",choix);
-				return(0);
-				break;
-			default:
-				break;
-			}
-		}
-	}
-
-}*/
+void actionINT2(void) {
+	//unsigned int ii;
+	timeClock += 1;
+	// Acquittement de l'interruption
+	MCF_DTIM2_DTER = MCF_DTIM_DTER_REF | MCF_DTIM_DTER_CAP;
+}
 
 int main (void)
 {	
 	printf("Starting ...:\n");
 	char temp, choix;
-	unsigned int i, gas, cpt_ech, cpt_moyAngle, initialThurst;
+	unsigned int i, gas, cpt_ech, cpt_moyAngle;
 	gas = 0;
-	initialThurst = 0;
-	printf("Réponse indicielle:\n");
-
-
-	/*printf("+ ou - pour les gas\n");
-	printf("V / v pour gain Gv X et Y\n");
-	printf("A / a pour gain Ga X et Y\n");
-	printf("Z / z pour gain GvZ\n");*/
+	printf("Reponse indicielle:\n");
 	
-	
+
 /* INIT des gains*/
 	GaX=1;
 	GaY=1;
@@ -135,22 +140,14 @@ int main (void)
 	IGpX=4;	//gain 1/4
 	IGpY=4;
 	
-/*Init des pointeurs de moyennage et des tableaux*/
-	for(pTabmoyAX=tabMoyAX;pTabmoyAX<=tabMoyAX+sizeof(tabMoyAX)-1;pTabmoyAX++)
-		*pTabmoyAX=0;
-	for(pTabmoyAY=tabMoyAY;pTabmoyAY<=tabMoyAY+sizeof(tabMoyAY)-1;pTabmoyAY++)
-		*pTabmoyAY=0;
-	pTabmoyAX=tabMoyAX;
-	pTabmoyAY=tabMoyAY;
-	
 /*Init des IOs*/	
 	Init_5213();		//bus SPI
 	Init_PWM();
-	if(Init_AccGyro())	//Init des composants
-		printf("Erreur d'init Acc ou Gyro\n");
-	//RAZ de tabInertieOld pour premier calcul de derivee
-	for(i=0;i<6;i++)
-		bufGyroOld[i]=0;
+	int result = Init_AccGyro();
+	while(!result){	//Init des composants
+		printf("Erreur d'init Acc ou Gyro, retrying ...\n");
+		result = Init_AccGyro();
+	}
 		
 //lecture temp sur Gyro :	
 	CSG_ON;
@@ -163,87 +160,54 @@ int main (void)
 
 	while(1)
 	{
-		if ((MCF_DTIM3_DTER & 2)!=0)	//en retard sur echantillonnage ?
-			printf("Ech rate!!\n");	
 		while ((MCF_DTIM3_DTER & 2)==0);//attend prochain date ech
 		MCF_DTIM3_DTER = 2;				//RAZ Flag
 
 		GetInertie();	//retourne dans tabInertie les valeurs
-		
-		//fenêtre de moyennage sur 8 echantillons pour l'assiette
-		SumAX-=*pTabmoyAX;	//retrancher l'element le + ancien de la somme de la moyenne glissante
-		*pTabmoyAX=AX;		//insérer dans le tableau circulaire le nouvel element
-		SumAX+=*pTabmoyAX;	//mettre a jour la somme
-		if (pTabmoyAX==(tabMoyAX+sizeof(tabMoyAX)-1))	//fin de buffer circulaire atteinte ?
-			pTabmoyAX=tabMoyAX;			//repointer au début
-		else
-			pTabmoyAX++;	//déplacer le pointeur de buffer circulaire
+		ComplementaryFilter(accData,gyrData,&pitch,&roll);
 
-		MoyAX=SumAX/sizeof(tabMoyAX);		//diviser pour calculer la moyenne
-		
-		SumAY-=*pTabmoyAY;	//retrancher l'element le + ancien de la somme de la moyenne glissante
-		*pTabmoyAY=AY;		//insérer dans le tableau circulaire le nouvel element
-		SumAY+=*pTabmoyAY;	//mettre a jour la somme
-		if (pTabmoyAY==(tabMoyAY+sizeof(tabMoyAY)-1))	//fin de buffer circulaire atteinte ?
-			pTabmoyAY=tabMoyAY;			//repointer au début
-		else
-			pTabmoyAY++;	//déplacer le pointeur de buffer circulaire
-		
-		MoyAY=SumAY/sizeof(tabMoyAY);		//diviser pour calculer la moyenne
-		
-		/*		
-		 cpt_moyAngle++;		//compteur de moyennage
-		 SumAY+=AY;			// Il faudrait faire en fait une moyenne glissante
-		 SumAX+=AX;
-		 if (cpt_moyAngle>15) {
-		 cpt_moyAngle=0;
-		 MoyAX=(char)SumAX>>4;
-		 MoyAY=(char)SumAY>>4;
-		 SumAX=0; SumAY=0;
-		 }
-		 */
-		//control_r=sat(GvX*VAX,-100,100) + sat(GaX*AAX,-50,50) + MoyAX/IGpX; //axe X
-		//control_p=-sat(GvY*VAY,-100,100) + sat(GaY*AAY,-50,50) - MoyAY/IGpY ;//axe Y
-		//control_y=sat(GvZ*VAZ,-50,50);//+sat(boussole);
-	
-		//moteurs : centrale inertielle+position+vitesse
-		//Axe Y(p) provoque une rotation Z(Y) en sens + => il faut compenser en baissant control_p par control_y
-		//moteur devant : tête axe X, PWM7
-        //moteur2 = /*anc M1(int)(-r_pitch - r_yaw)*/ gas + ( control_p  + control_y );// - (int)control_z;
-		//moteur derrière : arriere axe X, PWM3
-        //moteur1 = /*anc M2(int)(r_pitch - r_yaw)*/ gas + ( -control_p + control_y );// + (int)control_z;
-		//moteur gauche : arriere axe Y, PWM5
-        //moteur3 = /*anc M3(int)(r_roll + r_yaw)*/  gas + ( -control_r  - control_y );// + (int)control_x;
-		//moteur droit : tete axe Y, PWM1
-        //moteur4 = /*anc M4(int)(-r_roll + r_yaw)*/  gas + ( control_r - control_y );// - (int)control_x;
 
-        //moteur1 = initialThurst;
-		//moteur2 = initialThurst;
-	//	PWMot1 = (unsigned char)sat(moteur1+110,100,180);
-	//	PWMot2 = (unsigned char)sat(moteur2+110,100,180);
-	//	PWMot3 = (unsigned char)sat(moteur3+110,100,180);
-	//	PWMot4 = (unsigned char)sat(moteur4+110,100,180);	//on limite a 180 pour commencer...
-		
-		
-//la commande des moteur est entre 110 et 240 => offset a ajouter
-        MCF_PWM_PWMDTY7 = initialThurst;
-        MCF_PWM_PWMDTY3 = initialThurst;
-        MCF_PWM_PWMDTY5 = initialThurst;
+        MCF_PWM_PWMDTY5 = initialThurst + thrustOffset;
         MCF_PWM_PWMDTY1 = initialThurst;
-		/*MCF_PWM_PWMDTY7 = (unsigned char)sat(moteur1+110,100,240);
-		MCF_PWM_PWMDTY3 = (unsigned char)sat(moteur2+110,100,240);
-		MCF_PWM_PWMDTY5 = (unsigned char)sat(moteur3+110,100,240);
-		MCF_PWM_PWMDTY1 = (unsigned char)sat(moteur4+110,100,240);	//on limite a 180 pour commencer...*/
-	
 
-		cpt_ech++;			//compteur d'echantillons
-		if(cpt_ech>99)
-		{
-			cpt_ech=0;
-			//printf("GAS=%d, PWMot1,2,3,4=%d,%d,%d,%d\n",gas,PWMot1,PWMot2,PWMot3,PWMot4);
-			/*printf("MoyAX,MoyAY=%d,%d  VAX,VAY,VAZ=%d,%d,%d   AAX,AAY,AAZ=%d,%d,%d\n",MoyAX,MoyAY,VAX,VAY,VAZ,AAX,AAY,AAZ);
-			printf("control_r,p,y=%d,%d,%d\n",control_r,control_p,control_y);
-			printf("moteurs 1,2,3,4=%d,%d,%d,%d\n\n",moteur1+110,moteur2+110,moteur3+110,moteur4+110);*/
+
+		if (controlActivated){
+			errorPitch = targetPitch - (signed int)pitch;
+			errorRoll = targetRoll - (signed int)roll;
+
+			control_p = errorPitch / 2;
+			
+			moteur3 =  gas + control_p;
+			moteur4 =  gas - control_p;
+
+			MCF_PWM_PWMDTY5 = (unsigned char)sat(moteur3+110,100,180);
+			MCF_PWM_PWMDTY1 = (unsigned char)sat(moteur4+110,100,180);	//on limite a 180 pour commencer...
+			gas = 20;
+		} else {
+			MCF_PWM_PWMDTY5 = 120;
+			MCF_PWM_PWMDTY1 = 120;
+			gas = 0;
+		}
+
+
+
+		if (testMode){
+			if (shouldFinishTest){
+				testMode = 0;
+				shouldFinishTest = 0;				
+				out_byte(1);	
+			} else { 
+				out_byte(0);
+			}	
+			
+			out_byte(accData[0]);
+			out_byte(accData[1]);
+			out_byte(gyrData[0]);
+			out_byte(gyrData[1]);
+			out_byte((char)roll);
+			out_byte((char)pitch);
+			totalSample ++;
+
 		}
 /* Test clavier */
 		if (kbhit())
@@ -252,73 +216,71 @@ int main (void)
 				switch (choix)
 				{
 				case '+':
+					if (initialThurst == 0){
+						initialThurst = 120;
+					} else {
+						initialThurst += 5;
+					} 
 					//if (initialThurst < 200) initialThurst+=5;
-					printf("initialThurst=%d\n",initialThurst);
+					//printf("initialThurst=%d\n",initialThurst);
 					break;
 				case '-':
-					//if (initialThurst > 120) initialThurst-=5;
-					printf("initialThurst=%d\n",initialThurst);
-					break;
-				case 's':
-					//initialThurst = 110;
-					printf("Setting motors to initial value %d \n",initialThurst);
-					break;
-				/*case 'V':
-					GvX++; GvY++;
-					printf("Gv=%d\n",GvX);
-					break;
-				case 'v':
-					if (GvX>1)
-					{
-						GvX--; GvY--;
+					if (initialThurst == 120){
+						initialThurst = 0;
+					} else {
+					initialThurst-=5;
 					}
-					printf("Gv=%d\n",GvX);
+					//printf("initialThurst=%d\n",initialThurst);
 					break;
-				case 'A':
-					GaX++; GaY++;
-					printf("Ga=%d\n",GaX);
-					break;
+				case 'b':
+					if (controlActivated == 1){
+						controlActivated = 0;
+					} else {
+						controlActivated = 1;
+					}	
+				case 'p':
+					out_byte((char)roll);
+					out_byte((char)pitch);
+				break;	
+				case 'o':
+					out_byte(accData[0]);
+					out_byte(accData[1]);
+					out_byte(accData[2]);
+					out_byte(gyrData[0]);
+					out_byte(gyrData[1]);
+					out_byte(gyrData[2]);
+				break;
 				case 'a':
-					if (GaX>1)
-					{
-						GaX--; GaY--;
-					}
-					printf("Ga=%d\n",GaX);
-					break;
-				case 'Z':
-					GvZ++;
-					printf("GvZ=%d\n",GvZ);
-					break;
-				case 'z':
-					if (GvZ>1)
-					{
-						GvZ--;
-					}
-					printf("GvZ=%d\n",GvZ);
-					break;
-				case 'p':	//c'est variable inverse
-					IGpX++; IGpY++;
-					printf("IGp=%d\n",IGpX);
-					break;
-				case 'P':
-					if (IGpX>1)
-					{
-						IGpX--; IGpY--;
-					}
-					printf("IGp=%d\n",IGpX);
-					break;*/
+					MCF_DTIM0_DTMR=0x501B;
+					testMode = 1;
+				break;
+
+
 				case (27):
 				case (10):		// Arret d'urgence
-					MCF_PWM_PWMDTY1 = 0;	//couper les PWM
-					MCF_PWM_PWMDTY3 = 0;
-					MCF_PWM_PWMDTY5 = 0;
-					MCF_PWM_PWMDTY7 = 0;
+					stopTest();
 					return(0);
 					break;
 			
 				}
 			}
 	}		
+}
+
+void stopTest(){
+	initialThurst = 0;
+    thrustOffset = 0;
+	MCF_PWM_PWMDTY1 = 0;	//couper les PWM
+	MCF_PWM_PWMDTY3 = 0;
+	MCF_PWM_PWMDTY5 = 0;
+	MCF_PWM_PWMDTY7 = 0;
+
+
+	MCF_DTIM0_DTMR=0x500B;
+	nirq = 0;
+	testMode = 0;
+
+	//test(2,3);
 }
 
 void Init_PWM (void)
@@ -351,20 +313,25 @@ void Init_5213(void)
 	MCF_GPIO_PQSPAR = 0x0015;	//QS4 GPIO(CS Acc), QS3..1 en primary pour SPI	
 
 	//Config Timer0 pour temporiser les échelons à 0.2s
-	MCF_DTIM0_DTMR=0x501B; //RAZ auto, pas de prediv 16, IT
+	MCF_DTIM0_DTMR=0x500B; //RAZ auto, pas de prediv 16, IT
 	MCF_DTIM0_DTRR=19999; //Registre Reference pour 100Hz
 	MCF_DTIM0_DTCN=0; //RAZ registre Compteur
 	MCF_DTIM0_DTER=0x03; //RAZ registre Drapeaux
 
-	//MCF_INTC_ICR1 = 0xB0000000;
-	//MCF_INTC_ICR19 = MCF_INTC_ICR_IL(0x4);
 	MCF_INTC_ICR19 = MCF_INTC_ICR_IL(0x5);
-	MCF_INTC_IMRL = MCF_INTC_IMRL & ~(MCF_INTC_IMRL_MASK19);
-	//MCF_INTC_ICR44 = MCF_INTC_ICR_IP(0x7);
+	MCF_INTC_ICR21 = MCF_INTC_ICR_IL(0x5);
+	MCF_INTC_IMRL = MCF_INTC_IMRL & ~(MCF_INTC_IMRL_MASK19 | MCF_INTC_IMRL_MASK21);
+	
 	io_32(ADR_VECT_INT0) = (long)isrINT0; // Chargement du vecteur d'interruption dans la table
+	io_32(ADR_VECT_INT2) = (long)isrINT2;
 	__asm("move.w #0x2200,%sr\n");	 // Initialisation a 2 du masque de priorite d'interruption dans le registre d'etat	
 	
-	//MCF_INTC_ICR_IL
+	//Config Timer2 pour calcul des temps passés, toutes les uS (prediv 80)
+	MCF_DTIM2_DTMR=0x500B; //RAZ auto, pas de prediv 16, pas d'IT
+	MCF_DTIM2_DTRR=1; //Registre Reference pour 1MHz
+	MCF_DTIM2_DTCN=0; //RAZ registre Compteur
+	MCF_DTIM2_DTER=0x03; //RAZ registre Drapeaux	
+
 	//Config Timer3 pour echantillonage 100Hz A PARTIR DE CLK+80MHZ
 	//division par 80 par prediv puis ref=10000 => 100HZ
 	MCF_DTIM3_DTMR=0x500B; //RAZ auto, pas de prediv 16, pas d'IT
@@ -387,23 +354,16 @@ void Init_5213(void)
 	MCF_GPIO_SETQS=0x10;		// mise à niveau haut du CS acc
 }	
 
-/*int sat(int value, int min, int max)
-{
-	int retour;
-	if (value>max)	retour=max;
-	else if (value < min) retour=min;
-		 else retour=value;
-	return (retour);
-}*/
 
 void GetInertie(void)
 {
 	char bufAcc[6],bufGyro[6];
+	//short gyrData[3], accData[3];
 
 	unsigned char ad, datawrite, dataread;
 	unsigned char gyro_value,acc_value;
 
-	double floatX,floatY;
+	double doubleX,doubleY;
 //lecture des donnees
 	CSA_ON;
 	SpiRead6R(bufAcc);
@@ -412,40 +372,38 @@ void GetInertie(void)
 	SpiRead6R(bufGyro);
 	CSG_OFF;
 
-//Calcul de l'assiette. Attention : les axes X et Y sont echanges par raport au Gyro. Coup de chance, ceci signifie que
-//on recupere sur AY une acc quand on tourne AUTOUR de l'axe Y (l'acc est dans la direction X)
-//Donc, pour le calcul de Theta, on aurait normalement l'info d'acc de l'axe X qui nous donne l'angle autour de Y
-//mais ici c'est l'info autour de l'AccY qui nous donne l'angle autour de Y
-//Lorsque le Gyro donne une dTheta >0, l'inclinaison est >0 aussi (encore un coup de chance)
-//l'axe Z sert uniquement à déterminer une inversion du vol, il faut en tenir compte après si on veut tester ceci
-//Theta=arcsin(mesure/g) et -2g<plage mesure<2g => normalisation en divisant par 64 puis calcul flotant
-	if(bufAcc[1]>64) bufAcc[1]=64;	//tronquer AccX à +-1g pour calcul assiette
-	else if (bufAcc[1]<-64) bufAcc[1]=-64;
-	if(bufAcc[3]>64) bufAcc[3]=64;	//tronquer AccY à +-1g pour calcul assiette
-	else if (bufAcc[3]<-64) bufAcc[3]=-64;
 
-	floatX = asin(bufAcc[1]/64.0);
-	floatY = asin(bufAcc[3]/64.0);
+	accData[0] = bufAcc[1];
+	accData[1] = bufAcc[3];
+	accData[2] = bufAcc[5];
 
-	tabInertie[0] = (char)(floatX*180/PI);//	-90<result<90 
-	tabInertie[1] = (char)(floatY*180/PI);//	-90<result<90 
-	tabInertie[2] = bufAcc[5];	//Acc Z en brut : utile uniquement pour le signe
-	
-//Recuperation des vitesses angulaires
-	tabInertie[3]=bufGyro[1];	//dThetaX MSB
-	tabInertie[4]=bufGyro[3];	//dThetaY MSB
-	tabInertie[5]=bufGyro[5];	//dThetaZ MSB
-	
-//Calcul des accelerations angulaires
-	//On considère que la soustraction ne peut pas generer de debdt (par exemple 125 - -6=131)
-	//c'est a dire que la variation ne peut pas exceder 128 entre 2 echantillons
-	tabInertie[6]=bufGyro[1]-bufGyroOld[1]; //d²ThetaX=dThetaX-dThetaXOld
-	tabInertie[7]=bufGyro[3]-bufGyroOld[3];
-	tabInertie[8]=bufGyro[5]-bufGyroOld[5];
-
-	bufGyroOld[1]=bufGyro[1];
-	bufGyroOld[3]=bufGyro[3];
-	bufGyroOld[5]=bufGyro[5];
+	gyrData[0] = bufGyro[3];
+	gyrData[1] = bufGyro[1];
+	gyrData[2] = bufGyro[5];	
 }
+
+void ComplementaryFilter(char accData[3], char gyrData[3], double *pitch, double *roll)
+{
+    double pitchAcc, rollAcc;               
+ 
+
+    // Integrate the gyroscope data -> int(angularSpeed) = angle
+    *pitch += (gyrData[0] / GYROSCOPE_SENSITIVITY) * dt; // Angle around the X-axis
+    *roll -= (gyrData[1] / GYROSCOPE_SENSITIVITY) * dt;    // Angle around the Y-axis
+
+    int forceMagnitudeApprox = abs(accData[0]) + abs(accData[1]) + abs(accData[2]);
+    if (forceMagnitudeApprox > 32 && forceMagnitudeApprox < 128) // 32 - 128 -- 8192 - 32768
+    {
+	// Turning around the X axis results in a vector on the Y-axis
+
+        pitchAcc = atan2f(accData[1], accData[2]) * 180 / PI; // 0 - 2
+        *pitch = *pitch * (1 - compFilterCoef) + pitchAcc * compFilterCoef;
+ 
+	// Turning around the Y axis results in a vector on the X-axis
+        rollAcc = atan2f(accData[0], accData[2]) * 180 / PI; // 1 - 2
+        *roll = *roll * (1 - compFilterCoef) + rollAcc * compFilterCoef;
+
+    }
+} 
 
 

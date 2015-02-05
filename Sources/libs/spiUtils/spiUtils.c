@@ -19,12 +19,14 @@ void Init_spi (void)
 	MCF_GPIO_SETUA=0x08;		// mise à niveau haut du CS gyro
 	MCF_GPIO_DDRQS|=0x10;		// CS de l'accéléro mis en sortie
 	MCF_GPIO_SETQS=0x10;		// mise à niveau haut du CS acc
+	
 }
+
 
 char Init_AccGyro (void)
 {
-	unsigned char gyro_value, acc_value;
-//config Gyro CTRL_REG1:
+	unsigned char gyro_value, acc_value,control_value;
+	//config Gyro CTRL_REG1:
 	//ODR=400Hz, Cut-off=110Hz => DR+BW="1011"
 	//Tous les axes activés : PD=1, Zen=1, Yen=1, Xen=1
 	CSG_ON;
@@ -33,7 +35,7 @@ char Init_AccGyro (void)
 	
 	//CTRLREG2:
 	//normal mode :0000
-	//filtre passe haut =0,1Hz, avec ODR400Hz : 1000
+	//filtre passe haut = 0,1Hz, avec ODR400Hz : 1000
 	CSG_ON;
 	SpiWrite8(ST_CTRL_REG2,0x08);
 	CSG_OFF;
@@ -45,13 +47,14 @@ char Init_AccGyro (void)
 	CSG_OFF;
 	
 	//CTRLREG5 : HPF ?
-	CSG_ON;
-	SpiWrite8(ST_CTRL_REG5,0x00);//HPF enable : 0x10 
-	CSG_OFF;
+	//CSG_ON;
+	//SpiWrite8(ST_CTRL_REG5,0x10);//HPF enable : 0x10 
+	//CSG_OFF;
 	
-//Config Acc CTRL_REG1:
+	//Config Acc CTRL_REG1:
 	CSA_ON;
-	SpiWrite8(ST_CTRL_REG1,0x37);	//Mode normal, data rate 400Hz, en all axis
+	//SpiWrite8(ST_CTRL_REG1,0x37);	//Mode normal, data rate 400Hz, en all axis, LP 292Hz
+	SpiWrite8(ST_CTRL_REG1,0x2F);	 //Mode normal, data rate 100Hz, en all axis, LP  74Hz
 	CSA_OFF;
 	//CTRL_REG2 : default value : Filters bypass
 	//CTRLREG3: default VAlue, pas d'ITS
@@ -63,10 +66,14 @@ char Init_AccGyro (void)
 	CSG_ON;
 	gyro_value=SpiRead8(ST_WHO_AM_I);
 	CSG_OFF;
-	//printf("Who am I ACC=%d\tWho am I Gyro=%d\n",acc_value,gyro_value);
-	if ((acc_value != 0x32) || (gyro_value !=0xd3))
-		return(-1);
-	else return(0);
+
+	printf("Acc value: 0x%x, Gyro value: 0x%x \n",acc_value,gyro_value);
+
+	if ((acc_value != 0x32) || (gyro_value !=0xd3)){
+		return(0);
+	} else {
+		return(1);
+	} 
 }
 
 void SpiWrite8 (unsigned char ad, unsigned char datawrite)
