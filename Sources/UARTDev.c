@@ -23,13 +23,18 @@ Version :	1.0 - 27-06-2013 Tests de base
 extern void isrINT0(void);
 extern void isrINT2(void);
 
+int _atan2(float y, float x);
+
 int __errno=0;	//pour gestion messages d'erreur des fcts asin, acos de libm.a
 
 
 unsigned long timeClock,startTime = 0,count;
 int sat(int value, int min, int max);
+void GetInertie();
 void Init_5213(void);
 void Init_PWM (void);
+
+char accData[3],gyrData[3];
 
 
 
@@ -68,6 +73,24 @@ void printOutData(){
 	out_byte(tabInertie[8]);	
 }
 
+void printOutData2(){
+	//printf("Acc X:%d Y:%d Z:%d \n",accData[0],accData[1],accData[2]);
+	//printf("V 	X:%d Y:%d Z:%d \n\n",gyrData[0],gyrData[1],gyrData[2]);}
+	printf("atan2f %d \n",(char)(atan2f(1.73,1)* 180 / PI));
+	printf("_atan2 %d \n",_atan2(1.73,1));
+
+	printf("atan2f %d \n",(char)(atan2f(-1.73,1)* 180 / PI));
+	printf("_atan2 %d \n",_atan2(-1.73,1));
+
+	printf("atan2f %d \n",(char)(atan2f(0.5,1.73/2)* 180 / PI));
+	printf("_atan2 %d \n",_atan2(0.5,1.73/2));
+
+	printf("atan2f %d \n",(char)(atan2f(-0.5,1.73/2)* 180 / PI));
+	printf("_atan2 %d \n",_atan2(-0.5,1.73/2));		
+
+	printf("Done");
+
+}
 int main (void)
 {	
 	printf("Starting ...:\n");
@@ -80,6 +103,12 @@ int main (void)
 /*Init des IOs*/	
 	Init_5213();		//bus SPI
 	getch();
+
+	int result = Init_AccGyro();
+	while(!result){	//Init des composants
+		printf("Erreur d'init Acc ou Gyro, retrying ...\n");
+		result = Init_AccGyro();
+	}	
 	
 
 	while(1)
@@ -89,19 +118,12 @@ int main (void)
 		//Test(2,3);
 		while ((MCF_DTIM3_DTER & 2)==0);
 			//printf("wait");
-		
-		//float 
 
-		double result = atan2(1.73,1);
-		printf("\nResult 1 : %d\n",result);
-
-		result = atan2(1/1.73,1);
-		printf("\nResult 2 : %d \n",result);		
+		MCF_DTIM3_DTER = MCF_DTIM_DTER_REF | MCF_DTIM_DTER_CAP;
+			
+		GetInertie();
 		//attend prochain date ech
-		result = PI;
-		printf("\PI  : %d \n",result);
-
-		MCF_DTIM3_DTER = MCF_DTIM_DTER_REF | MCF_DTIM_DTER_CAP;				//RAZ Flag	
+						//RAZ Flag	
 	
 		count ++;
 
@@ -146,9 +168,9 @@ int main (void)
 					break;
 
 				case 'o':
-					startTime = timeClock;
-					printOutData();
-					printf("\nTime for 9 bytes: %d \n",timeClock - startTime);
+					//startTime = timeClock;
+					printOutData2();
+					//printf("\nTime for 9 bytes: %d \n",timeClock - startTime);
 					break;					
 
 				case (27):
@@ -213,3 +235,54 @@ void Init_5213(void)
 	MCF_GPIO_SETQS=0x10;		// mise à niveau haut du CS acc
 }
 
+
+void GetInertie(void)
+{
+	char bufAcc[6],bufGyro[6];
+	//short gyrData[3], accData[3];
+
+	unsigned char ad, datawrite, dataread;
+	unsigned char gyro_value,acc_value;
+
+	double doubleX,doubleY;
+//lecture des donnees
+	CSA_ON;
+	SpiRead6R(bufAcc);
+	CSA_OFF;
+	CSG_ON;
+	SpiRead6R(bufGyro);
+	CSG_OFF;
+
+	//printf("1 Acc X:%d Y:%d Z:%d \n",bufAcc[1],bufAcc[3],bufAcc[5]);
+
+	accData[0] = bufAcc[1];
+	accData[1] = bufAcc[3];
+	accData[2] = bufAcc[5];
+
+	//printf("2 Acc X:%d Y:%d Z:%d \n\n",accData[0],accData[1],accData[2]);
+
+
+	gyrData[0] = bufGyro[1];
+	gyrData[1] = bufGyro[3];
+	gyrData[2] = bufGyro[5];	
+}
+
+int _atan2(float y, float x){
+  //#define fp_is_neg(val) ((((unsigned char*)&val)[3] & 0x80) != 0)
+  float z = y / x;
+  int zi = abs((int)(z * 100)); 
+  //unsigned char y_neg = fp_is_neg(y);
+  if ( zi < 100 ){
+    if (zi > 10) 
+     z = z / (1.0f + 0.28f * z * z);
+   if (x < 0) {
+     if (y < 0) z -= PI;
+     else z += PI;
+   }
+  } else {
+   z = (PI / 2.0f) - z / (z * z + 0.28f);
+   if (y < 0) z -= PI;
+  }
+  z *= (180.0f / PI * 10); 
+  return z;
+}

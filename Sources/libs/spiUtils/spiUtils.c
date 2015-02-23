@@ -30,6 +30,7 @@ char Init_AccGyro (void)
 	//ODR=400Hz, Cut-off=110Hz => DR+BW="1011"
 	//Tous les axes activés : PD=1, Zen=1, Yen=1, Xen=1
 	CSG_ON;
+	SpiWrite8(ST_CTRL_REG1,0x08); // power down first
 	SpiWrite8(ST_CTRL_REG1,0xBF);//0b1011.1111
 	CSG_OFF;
 	
@@ -67,11 +68,12 @@ char Init_AccGyro (void)
 	gyro_value=SpiRead8(ST_WHO_AM_I);
 	CSG_OFF;
 
-	printf("Acc value: 0x%x, Gyro value: 0x%x \n",acc_value,gyro_value);
+	
 
 	if ((acc_value != 0x32) || (gyro_value !=0xd3)){
 		return(0);
 	} else {
+		printf("Acc value: 0x%x, Gyro value: 0x%x \n",acc_value,gyro_value);
 		return(1);
 	} 
 }

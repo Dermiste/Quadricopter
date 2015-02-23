@@ -27,7 +27,7 @@ PGM2 = 4xCopterV1.1
 PGM3 = ReponseIndicielle
 PGM4 = UARTDev
 
-PGMs = ReponseIndicielle
+PGMs = JourneePortesOuvertes ReponseIndicielle
 
 OBJS = libs/crt/crt.o launch_ITs.o libs/spiUtils/spiUtils.o libs/imuUtils/imuUtils.o libs/mfprintf/mfprintf.o libs/lib-iobase-evb5213/lib-iobase-evb5213.o
 

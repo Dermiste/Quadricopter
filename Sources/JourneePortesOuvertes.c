@@ -83,10 +83,11 @@ int targetPitch = 0, targetRoll = 0, targetYawSpeed = 0;
 int errorPitch = 0, errorRoll = 0, errorYawSpeed = 0;
 int integratedErrorPitch = 0, integratedErrorRoll = 0, integratedErrorYawSpeed=0;
 signed int control_roll=0,control_pitch=0,control_yaw=0;
-char stepPID = 1;
+
 
 char controlMode = 0,controlActivated = 0;
 
+int thrustOn = 0;
 
 #define dt 0.01
 #define freq 100
@@ -94,7 +95,9 @@ char controlMode = 0,controlActivated = 0;
 #define timeConstant 0.5
 #define compFilterCoef timeConstant / (timeConstant + dt)//0.9782;
 
-char kP = 19, kI = 70, kD = 5; // idea: 40 30 23
+char kP = 50, kI = 75, kD = 20;
+
+int shouldTrace = 0;
 
 void actionINT0(void) {
 	//unsigned int ii;
@@ -110,7 +113,7 @@ void actionINT0(void) {
 		break;	*/	
 
 		case 220:
-			initialThurst = 120;
+			initialThurst = 140;
 		break;	
 
 /*
@@ -158,14 +161,8 @@ int main (void)
 		printf("Erreur d'init Acc ou Gyro, retrying ...\n");
 		result = Init_AccGyro();
 	}
-		
-//lecture temp sur Gyro :	
-	/*CSG_ON;
-	temp=SpiRead8(ST_GYRO_OUT_TEMP);
-	CSG_OFF;
-	printf("TempGyro=%d\n",temp );*/
 
-	printf("Status=%d\n",temp );		
+	//printf("Status=%d\n",temp );		
 	//printf("taper touche\n");
 	getch();
 	
@@ -180,13 +177,11 @@ int main (void)
 		ComplementaryFilter(accData,gyrData,&pitch,&roll);
 		//printf("After Filter Gyr X:%d Y:%d Z:%d \n",gyrData[0],gyrData[1],gyrData[2]);	
 
-		if (controlActivated){
+		/*if (controlActivated){
 			if (controlMode){
-				
-
 				errorPitch = targetPitch - pitch/10;
 				errorRoll = targetRoll - roll/10;	
-				//errorYawSpeed = targetYawSpeed - gyrData[2] * 3.906;
+				errorYawSpeed = targetYawSpeed - gyrData[2] * 3.906;
 
 
 				//printf("Integrated error pitch : %d \n",(signed int)integratedErrorPitch);
@@ -194,8 +189,8 @@ int main (void)
 				integratedErrorRoll  += errorRoll;
 				integratedErrorYawSpeed += errorYawSpeed;
 
-				integratedErrorPitch = sat(integratedErrorPitch,-7000,7000);  // + ou - 300 
-				integratedErrorRoll =  sat(integratedErrorRoll,-7000,7000);
+				integratedErrorPitch = sat(integratedErrorPitch,-10000,10000);  // + ou - 300 
+				integratedErrorRoll =  sat(integratedErrorRoll,-10000,10000);
 
 				deltaPitch = pitch - lastPitch;
 				lastPitch = pitch;
@@ -206,78 +201,75 @@ int main (void)
 				control_pitch = errorPitch / kP + (integratedErrorPitch / freq) / kI - deltaPitch / kD;
 				control_roll = errorRoll / kP  + (integratedErrorRoll / freq ) /  kI - deltaRoll / kD;
 
-				//control_yaw = integratedErrorYawSpeed / freq / kI;	
-				//control_yaw = 0;	
+				control_yaw = integratedErrorYawSpeed / freq / kI;	
+				control_yaw = 0;	
 
 				moteur1 =  throttle + st + control_roll;
-				moteur2 =  throttle + st - control_roll;
+				moteur2 =  throttle + st - control_roll - control_yaw;
 
-				moteur3 =  throttle + st - control_pitch;
-				moteur4 =  throttle + st + control_pitch;
+				moteur3 =  throttle + st + control_pitch + control_yaw;
+				moteur4 =  throttle + st - control_pitch;
 
-				//MCF_PWM_PWMDTY7 = (unsigned char)sat(moteur1+110,100,210);	
-				//MCF_PWM_PWMDTY3 = (unsigned char)sat(moteur2+110,100,210);
+				MCF_PWM_PWMDTY7 = (unsigned char)sat(moteur1+110,100,180);	
+				MCF_PWM_PWMDTY3 = (unsigned char)sat(moteur2+110,100,180);
 
-				MCF_PWM_PWMDTY5 = (unsigned char)sat(moteur3+110,100,210);
-				MCF_PWM_PWMDTY1 = (unsigned char)sat(moteur4+110,100,210);	//on limite a 180 pour commencer...
-				//
-				throttle = 60;
+				//MCF_PWM_PWMDTY5 = (unsigned char)sat(moteur3+110,100,180);
+				//MCF_PWM_PWMDTY1 = (unsigned char)sat(moteur4+110,100,180);	//on limite a 180 pour commencer...
+				
+				throttle = 25;
 				//printf("Pitch [%d, %d, %d, %d] \n",pitch/100,control_pitch,integratedErrorPitch/10,deltaPitch);
 				//printf("Roll  [%d, %d, %d] \n",roll/10,errorRoll/10,integratedErrorRoll/10);
-				//printf("Yaw [%d] \n",errorYawSpeed);
-				//printf("Pitch %d Roll %d \n",pitch/100,roll/100);
+				printf("Yaw [%d] \n",errorYawSpeed);
 			} else {
-				MCF_PWM_PWMDTY7 = initialThurst;
-				MCF_PWM_PWMDTY3 = initialThurst;
+				MCF_PWM_PWMDTY7 = 120;
+				MCF_PWM_PWMDTY3 = 120;
 
-				MCF_PWM_PWMDTY5 = initialThurst;
-				MCF_PWM_PWMDTY1 = initialThurst;
+				MCF_PWM_PWMDTY5 = 120;
+				MCF_PWM_PWMDTY1 = 120;
 				throttle = 0;
 			}
 		} else {
 			MCF_PWM_PWMDTY1 = initialThurst;
-			MCF_PWM_PWMDTY3 = initialThurst;
+			//MCF_PWM_PWMDTY3 = initialThurst;
 			MCF_PWM_PWMDTY5 = initialThurst;
-			MCF_PWM_PWMDTY7 = initialThurst;
-		}
+			//MCF_PWM_PWMDTY7 = initialThurst;
+		}*/
+			if (shouldTrace){
+				out_byte(accData[0]);
+				out_byte(accData[1]);
+				out_byte(accData[2]);
+				out_byte(gyrData[0]);
+				out_byte(gyrData[1]);
+				out_byte(gyrData[2]);
+				out_byte(pitchFromAcc/100);
+				out_byte(pitchFromGyro/100);
+				out_byte(pitch/100);
+				out_byte(rollFromAcc/100);
+				out_byte(rollFromGyro/100);
+				out_byte(roll/100);
+			}
 
+			if (thrustOn == 1){
+				MCF_PWM_PWMDTY7 = 120;
+				MCF_PWM_PWMDTY3 = 120;
 
+				//MCF_PWM_PWMDTY5 = 120;
+				//MCF_PWM_PWMDTY1 = 120;
+			} else {
+				MCF_PWM_PWMDTY7 = 0;
+				MCF_PWM_PWMDTY3 = 0;
 
-		if (testMode){
-			if (shouldFinishTest){
-				testMode = 0;
-				shouldFinishTest = 0;				
-				out_byte(1);	
-			} else { 
-				out_byte(0);
-			}	
-
-			out_byte(accData[0]);
-			out_byte(accData[1]);
-			out_byte(accData[2]);
-			out_byte(gyrData[0]);
-			out_byte(gyrData[1]);
-			out_byte(gyrData[2]);
-
-			out_byte(pitchFromGyro/100);
-			out_byte(rollFromGyro/100);
-
-			out_byte(pitchFromAcc/100);
-			out_byte(rollFromAcc/100);
-
-			_p = pitch/100;
-			out_byte(_p);
-			_r = roll/100;
-			out_byte(_r);
-		}
+				MCF_PWM_PWMDTY5 = 0;
+				MCF_PWM_PWMDTY1 = 0;
+			}
 		/* Test clavier */
 		if (kbhit())
 			{
 				choix = getch();	//lire derniere touche appuyee
 				switch (choix)
 				{
-				case '=': // + sans le shift
-				    initialThurst += 5;
+				/*case '=': // + sans le shift
+				    st += 2;
 					break;
 				case '-':
 					if (st != 0)
@@ -286,48 +278,32 @@ int main (void)
 				case 'b':
 					if (controlActivated == 0){
 						controlActivated = 1;
-						initialThurst = 120;
 					} else { 	
 						if (controlMode == 1){
 							controlMode = 0;
 						} else {
 							controlMode = 1;
 						}	
-					}	
-				break;	
-				case 'p':
-					kP += stepPID;
-					printf("kP %d kI %d kD %d \n",kP,kI,kD);
+					}		*/	
+				case 'z':
+					pitchFromGyro = 0;
+					rollFromGyro = 0;
 				break;
-				case 'i':
-					kI += stepPID;
-					printf("kP %d kI %d kD %d \n",kP,kI,kD);
-				break;
-				case 'd':
-					kD += stepPID;
-					printf("kP %d kI %d kD %d \n",kP,kI,kD);
+				case 'm':
+					if (getch() == '1'){
+						thrustOn = 1;
+					} else {
+						thrustOn = 0;
+					}
 				break;
 
-				case 'P':
-					kP -= stepPID;
-					printf("kP %d kI %d kD %d \n",kP,kI,kD);
+				case 't':
+					if (shouldTrace == 0)
+					shouldTrace = 1;
+					else
+					shouldTrace = 0;
 				break;
-				case 'I':
-					kI -= stepPID;
-					printf("kP %d kI %d kD %d \n",kP,kI,kD);
-				break;
-				case 'D':
-					kD -= stepPID;
-					printf("kP %d kI %d kD %d \n",kP,kI,kD);
-				break;				
-				/*case 'p':
-					out_byte((char)roll);
-					out_byte((char)pitch);
-				break;	
-				case 'e':
-					printf("Pitch: %d Error Pitch: %d \n",pitch/10,errorPitch/10);
-					printf("Roll: %d  Error Roll: %d \n",roll/10,errorRoll/10);	
-				break;*/				
+
 				case 'o':
 					out_byte(accData[0]);
 					out_byte(accData[1]);
@@ -341,13 +317,14 @@ int main (void)
 					out_byte(rollFromAcc/100);
 					out_byte(rollFromGyro/100);
 					out_byte(roll/100);
-				break;	
-
+				break;									
 				case 'x':
 					printf("Acc X:%d Y:%d Z:%d \n",(char)accData[0],(char)accData[1],(char)accData[2]);
-					printf("V 	X:%d Y:%d Z:%d \n",(char)gyrData[0],(char)gyrData[1],(char)gyrData[2]);
+					printf("Gyro 	X:%d Y:%d Z:%d \n",(char)gyrData[0],(char)gyrData[1],(char)gyrData[2]);
+					printf("Pitch 	A:%d G:%d C:%d \n",pitchFromAcc/100,pitchFromGyro/100,pitch/100);
+					printf("Roll 	A:%d G:%d C:%d \n",rollFromAcc/100,rollFromGyro/100,roll/100);
 				break;
-				case 'a':
+				/*case 'a':
 					MCF_DTIM0_DTMR=0x501B;
 					testMode = 1;
 
@@ -356,13 +333,11 @@ int main (void)
 
 					pitchFromAcc = 0;
 					rollFromAcc = 0;
-				break;
+				break;*/
 			
-
 				case (27):
 				case (10):		// Arret d'urgence
-					printf("Exit %d\n",choix);	
-					printf("kP %d kI %d kD %d \n",kP,kI,kD);
+					//printf("Exit %d\n",choix);	
 					stopTest();
 					return(0);
 					break;
@@ -496,16 +471,16 @@ void ComplementaryFilter(char aData[3], char gData[3], int *pitch, int *roll)
     *roll -= 100 * gData[1] * 3.906 * dt;    // Angle around the Y-axis
 
     //if (testMode){
-    	pitchFromGyro += 100 * (gData[0] * 3.906) * dt;
-    	rollFromGyro -= 100 * (gData[1] * 3.906) * dt; 
+    pitchFromGyro += 100 * (gData[0] * 3.906) * dt;
+    rollFromGyro -= 100 * (gData[1] * 3.906) * dt; 
 	//}
 
     int forceMagnitudeApprox = abs(aData[0]) + abs(aData[1]) + abs(aData[2]);
     if (forceMagnitudeApprox > 32 && forceMagnitudeApprox < 128) // 32 - 128 -- 8192 - 32768
     {
     	//if (testMode){
-    		pitchFromAcc = 10 * __atan2(aData[0], aData[2]);
-    		rollFromAcc = 10 * __atan2(-aData[1], aData[2]);
+    	pitchFromAcc = 10 * __atan2(aData[0], aData[2]);
+    	rollFromAcc = 10 * __atan2(-aData[1], aData[2]);
     	//}
 
         pitchAcc = 10 * __atan2(aData[0], aData[2]); // 1 2
