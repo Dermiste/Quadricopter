@@ -151,7 +151,7 @@ int main (void)
 	char temp, choix,_r,_p;
 	unsigned int i, throttle,st;
 	throttle = 0,st = 0;
-	printf("Reponse indicielle:\n");
+	
 	
 /*Init des IOs*/	
 	Init_5213();		//bus SPI
@@ -161,9 +161,13 @@ int main (void)
 		printf("Erreur d'init Acc ou Gyro, retrying ...\n");
 		result = Init_AccGyro();
 	}
-
-	//printf("Status=%d\n",temp );		
-	//printf("taper touche\n");
+	printf("Script journées portes ouvertes. Controles:\n");
+	printf("Ech: quitter\n");
+	printf("o: 12 octets de données de vol\n");
+	printf("x: ces mêmes octets mis en formes\n");
+	printf("z: mets à zero les angles déterminés selon le gyro\n");
+	printf("m1: allume les moteurs à 120\n");
+	printf("m0: etteint les moteurs\n");
 	getch();
 	
 
@@ -173,9 +177,7 @@ int main (void)
 		MCF_DTIM3_DTER = 2;				//RAZ Flag
 
 		GetInertie();	//retourne dans tabInertie les valeurs
-		//printf("Gyr X:%d Y:%d Z:%d \n",gyrData[0],gyrData[1],gyrData[2]);
 		ComplementaryFilter(accData,gyrData,&pitch,&roll);
-		//printf("After Filter Gyr X:%d Y:%d Z:%d \n",gyrData[0],gyrData[1],gyrData[2]);	
 
 		/*if (controlActivated){
 			if (controlMode){
@@ -234,27 +236,13 @@ int main (void)
 			MCF_PWM_PWMDTY5 = initialThurst;
 			//MCF_PWM_PWMDTY7 = initialThurst;
 		}*/
-			if (shouldTrace){
-				out_byte(accData[0]);
-				out_byte(accData[1]);
-				out_byte(accData[2]);
-				out_byte(gyrData[0]);
-				out_byte(gyrData[1]);
-				out_byte(gyrData[2]);
-				out_byte(pitchFromAcc/100);
-				out_byte(pitchFromGyro/100);
-				out_byte(pitch/100);
-				out_byte(rollFromAcc/100);
-				out_byte(rollFromGyro/100);
-				out_byte(roll/100);
-			}
 
 			if (thrustOn == 1){
 				MCF_PWM_PWMDTY7 = 120;
 				MCF_PWM_PWMDTY3 = 120;
 
-				//MCF_PWM_PWMDTY5 = 120;
-				//MCF_PWM_PWMDTY1 = 120;
+				MCF_PWM_PWMDTY5 = 120;
+				MCF_PWM_PWMDTY1 = 120;
 			} else {
 				MCF_PWM_PWMDTY7 = 0;
 				MCF_PWM_PWMDTY3 = 0;
@@ -267,24 +255,7 @@ int main (void)
 			{
 				choix = getch();	//lire derniere touche appuyee
 				switch (choix)
-				{
-				/*case '=': // + sans le shift
-				    st += 2;
-					break;
-				case '-':
-					if (st != 0)
-						st -= 2;
-					break;
-				case 'b':
-					if (controlActivated == 0){
-						controlActivated = 1;
-					} else { 	
-						if (controlMode == 1){
-							controlMode = 0;
-						} else {
-							controlMode = 1;
-						}	
-					}		*/	
+				{	
 				case 'z':
 					pitchFromGyro = 0;
 					rollFromGyro = 0;
@@ -295,13 +266,6 @@ int main (void)
 					} else {
 						thrustOn = 0;
 					}
-				break;
-
-				case 't':
-					if (shouldTrace == 0)
-					shouldTrace = 1;
-					else
-					shouldTrace = 0;
 				break;
 
 				case 'o':
@@ -324,20 +288,10 @@ int main (void)
 					printf("Pitch 	A:%d G:%d C:%d \n",pitchFromAcc/100,pitchFromGyro/100,pitch/100);
 					printf("Roll 	A:%d G:%d C:%d \n",rollFromAcc/100,rollFromGyro/100,roll/100);
 				break;
-				/*case 'a':
-					MCF_DTIM0_DTMR=0x501B;
-					testMode = 1;
-
-					rollFromGyro = 0;
-					pitchFromGyro = 0;
-
-					pitchFromAcc = 0;
-					rollFromAcc = 0;
-				break;*/
 			
 				case (27):
 				case (10):		// Arret d'urgence
-					//printf("Exit %d\n",choix);	
+					printf("Exit %d\n",choix);	
 					stopTest();
 					return(0);
 					break;
