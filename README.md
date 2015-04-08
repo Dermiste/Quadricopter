@@ -1,15 +1,28 @@
 Quadricopter
 ============
 
-A project I am working on for my university.
+## Cartes
+Contient les schémas et empruntes de la carte mère (celle qui se trouve directement au dessus du Coldfire) ainsi que des 4 cartes mezzanines:
+- le gyroscope                LG4200D
+- l'accéléromètre             LIS331DLH
+- l'accéléromètre + boussole  LMS303D
+- le capteur de pression      LPS25h
 
-## To do (logs from 2013-2014's project)
-1. Intégrer les gyroscopes, de manière à calculer la déviation angulaire. Pour ça, il faut faire le zéro avant le décollage (±15dps d'erreur absolue).  On intègre les 16 bits, le bruit sera moyenné par l'intégration.
+## Controleur
+Les sources du projet phonegap permettant de réaliser une télécommande sur smartphone/tablette
 
-2. Accéléromètre : Quand l'intégration du gyroscope indique l'horizontale, (elle est forcément un peu fausse au bout d'un moment à cause du zéro pas parfait- ceci devrait être fait avant le décollage pour partir avec une intégration qui ne dérive pas : l'assiette doit rester nulle) on corrige le résultat de celle-ci avec le moyennage de l'assiette sur 10s au lieu de corriger directement par l'assiette. (il faut ajouter un offset à l'intégration des Gyro pour stopper la dérive ; ceci peut se tester facilement en position arrêtée).
+## Datasheet
+Les datasheet de tous les capteurs utilisés + certains .pdf qui se sont avérés utiles
 
-3. Filtrage des données : on active aucun filtrage puisqu'on le fait après pour l'assiette et par intégration pour la position des gyros. A voir si on peut passer à 800Hz pour le gyro et 1k pour l'accéléromètre?
+## Scilab Scripts
+Tout le nécessaire pour pouvoir recevoir des données depuis la liaison série et ensuite les afficher dans un graph
+À noter que l'installation d'une extension est nécessaire pour pouvoir faire fonctionner le script, disponible ici:
+https://atoms.scilab.org/toolboxes/serialport
 
-4. Syncronisation sur les capteurs : le faire sur le gyro. (pour l'accéléromètre, on se contente d'intégrer donc peu importe la date des échantillons) Ça se fait avec le CTRL_REG3 : bit 3 I2_DRDY qui génère IT sur INT2 quand l'échantillon est prêt.
 
-5. Correction de position XY : GPS avec calcul différentiel donne précision très bonne toutes les secondes ? => A utiliser pour corriger l'intégration de l'acceléromêtre sur axes XY sur le même principe que la position angulaire
+## Sources
+Le code C utilisé dans le quadcopter.
+Pour travailler sur un nouveau fichier basé sur l'existant, copier et renommer Sandbox.c qui contient le minimum vital (lecture capteur + filtrage) puis ajouter dans le makefile le nom du fichier dans la variable PGMs de la manière indiquée dans le commentaire juste au dessus. Noter que le makefile utilise un memory.x pour répartir certaines librairies entre la ROM et la RAM, d'ou les deux .s19 en sortie. Le "rom" est à uploader avec la sonde et ne change normalement pas (un seul upload donc, mais véto sur le "ne change pas") et le "ram" est à uploader avec dBug via un terminal.
+
+
+
