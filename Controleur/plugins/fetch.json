@@ -1,0 +1,40 @@
+{
+    "org.apache.cordova.device-motion": {
+        "source": {
+            "type": "registry",
+            "id": "org.apache.cordova.device-motion"
+        }
+    },
+    "org.apache.cordova.device-orientation": {
+        "source": {
+            "type": "registry",
+            "id": "org.apache.cordova.device-orientation"
+        }
+    },
+    "com.megster.cordova.bluetoothserial": {
+        "source": {
+            "type": "registry",
+            "id": "com.megster.cordova.bluetoothserial"
+        }
+    },
+    "com.phonegap.plugins.OrientationLock": {
+        "source": {
+            "type": "git",
+            "url": "https://github.com/cogitor/PhoneGap-OrientationLock.git",
+            "subdir": "."
+        }
+    },
+    "net.yoik.cordova.plugins.screenorientation": {
+        "source": {
+            "type": "registry",
+            "id": "net.yoik.cordova.plugins.screenorientation"
+        }
+    },
+    "org.dartlang.phonegap.gyroscope": {
+        "source": {
+            "type": "git",
+            "url": "https://github.com/zanderso/cordova-plugin-gyroscope.git",
+            "subdir": "."
+        }
+    }
+}

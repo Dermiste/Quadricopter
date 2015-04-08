@@ -1,0 +1,23 @@
+<?xml version='1.0' encoding='utf-8'?>
+<widget 
+	id="com.example.hello" 
+	version="0.0.1" 
+	xmlns="http://www.w3.org/ns/widgets" 
+	xmlns:gap="http://phonegap.com/ns/1.0"
+	xmlns:android="http://schemas.android.com/apk/res/android" 
+	xmlns:cdv="http://cordova.apache.org/ns/1.0"
+	>
+    <name>Quadcopter Control</name>
+    <description>
+        An app to control the quadcopter using a bluetooth serial connection
+    </description>
+    <author email="dev@cordova.apache.org" href="http://cordova.io">
+        Apache Cordova Team
+    </author>
+    <content src="index.html" />
+    <access origin="*" />
+	<gap:config-file platform="android" parent="/manifest">
+	     <application android:debuggable="true" />
+	</gap:config-file>    
+	<preference name="orientation" value="landscape" />
+</widget>
