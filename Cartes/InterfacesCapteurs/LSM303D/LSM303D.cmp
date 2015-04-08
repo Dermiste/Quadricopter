@@ -1,0 +1,45 @@
+Cmp-Mod V01 Created by Cvpcb (2015-03-06 BZR 5484)-product   date = 2015 March 26, Thursday 21:31:38
+
+BeginCmp
+TimeStamp = /55146158;
+Reference = C1;
+ValeurCmp = 4.7uF;
+IdModule  = Capacitors_SMD:C_0603;
+EndCmp
+
+BeginCmp
+TimeStamp = /5514673A;
+Reference = C2;
+ValeurCmp = 0.22uF;
+IdModule  = Capacitors_SMD:C_0603;
+EndCmp
+
+BeginCmp
+TimeStamp = /4D416AF3;
+Reference = C3;
+ValeurCmp = 10uF;
+IdModule  = Capacitors_SMD:C_1206;
+EndCmp
+
+BeginCmp
+TimeStamp = /4D416AFA;
+Reference = C4;
+ValeurCmp = 100nF;
+IdModule  = Capacitors_SMD:C_1206;
+EndCmp
+
+BeginCmp
+TimeStamp = /4D416855;
+Reference = P1;
+ValeurCmp = DIL8;
+IdModule  = Sockets_DIP:DIP-8__300_ELL;
+EndCmp
+
+BeginCmp
+TimeStamp = /55146681;
+Reference = U1;
+ValeurCmp = LSM303D;
+IdModule  = LGA:LGA16;
+EndCmp
+
+EndListe

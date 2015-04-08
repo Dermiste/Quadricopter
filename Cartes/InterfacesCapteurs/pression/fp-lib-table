@@ -1,0 +1,6 @@
+(fp_lib_table
+  (lib (name trnsl)(type Legacy)(uri ${KIPRJMOD}/../../Mezanine/Rootage/trnsl.mod)(options "")(descr ""))
+  (lib (name Born_Alim)(type Legacy)(uri ${KIPRJMOD}/../../Mezanine/Rootage/Born_Alim.mod)(options "")(descr ""))
+  (lib (name Footprints)(type Legacy)(uri ${KIPRJMOD}/../../../../../KiCad-Libraries/Footprints.mod)(options "")(descr ""))
+  (lib (name LGA)(type KiCad)(uri ${KIPRJMOD}/../../LGA.pretty)(options "")(descr ""))
+)

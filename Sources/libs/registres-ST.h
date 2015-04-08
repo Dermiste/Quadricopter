@@ -8,11 +8,17 @@
 #define __REGISTRES_ST__
 
 #define ST_WHO_AM_I		0x0F
+
+#define ST_STATUS_M      0x07
+
+#define ST_CTRL_REG0	0x1F
 #define ST_CTRL_REG1	0x20
 #define ST_CTRL_REG2	0x21
 #define ST_CTRL_REG3	0x22
 #define ST_CTRL_REG4	0x23
 #define ST_CTRL_REG5	0x24
+#define ST_CTRL_REG6	0x25
+#define ST_CTRL_REG7	0x26
 
 #define ST_STATUS_REG	0x27
 
@@ -26,6 +32,11 @@
 #define ST_INT1_CFG		0x30
 #define ST_INT1_SOURCE	0x31
 
+// définitions propres au barometre
+
+#define PRESS_OUT_XL		0x28
+#define PRESS_OUT_L			0x29
+#define PRESS_OUT_H			0x2A
 
 
 // définitions propres à l'accéléromètre:
@@ -39,6 +50,13 @@
 #define ST_ACC_INT2_SOURCE 		0x35
 #define ST_ACC_INT2_THS 		0x36
 #define ST_ACC_INT2_DURATION 	0x37
+
+#define ST_OUT_X_L_M	0x08
+#define ST_OUT_X_H_M	0x09
+#define ST_OUT_Y_L_M	0x0A
+#define ST_OUT_Y_H_M	0x0B
+#define ST_OUT_Z_L_M	0x0C
+#define ST_OUT_Z_H_M	0x0D
 
 
 

@@ -5,7 +5,7 @@
 	.file	"crt.s"
 	XDEF	start
 	XDEF	_start
-.xref end, __bss_start	/* predefini par le linker, debut et fin de section BSS */
+/*.xref end, __bss_start	/* predefini par le linker, debut et fin de section BSS */
 	ALIGN	4
 
 
@@ -17,8 +17,8 @@ _start:
 /*    move.l  #(__SP_INIT),%a7	 Initialize stack pointer %a7 to value in linker command file.*/
 	
 /* raz BSS section */
-	move.l #__bss_start, %a0;
-	move.l #end, %d0;
+	move.l #__BSS_START, %a0;
+	move.l #__BSS_END, %d0;
 
 clr_bss_ram:
 	cmp.l %a0, %d0

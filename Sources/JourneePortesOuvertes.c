@@ -8,24 +8,11 @@ Version :	1.0 - 27-06-2013 Tests de base
 
 #include "stdio.h"
 #include "main.h"
+#include "config.h"
 #include "libs/spiUtils/spiUtils.h"
 #include "libs/mcf5213/mcf5213.h"
 #include <math.h>
 
-#define AX tabInertie[0]
-#define AY tabInertie[1]
-#define AccZ tabInertie[2]
-#define VAX tabInertie[3]
-#define VAY tabInertie[4]
-#define VAZ tabInertie[5]
-#define AAX tabInertie[6]
-#define AAY tabInertie[7]
-#define AAZ tabInertie[8]
-
-#define ACCELEROMETER_SENSITIVITY 32.0 // 32.0 - 8192
-#define GYROSCOPE_SENSITIVITY 17.5			
-			
-#define PI 3.141592654
 
 int rollFromGyro=0, pitchFromGyro=0;
 int pitchFromAcc=0, rollFromAcc=0;
@@ -82,12 +69,18 @@ int lastPitch, lastRoll, deltaPitch, deltaRoll;
 int targetPitch = 0, targetRoll = 0, targetYawSpeed = 0;
 int errorPitch = 0, errorRoll = 0, errorYawSpeed = 0;
 int integratedErrorPitch = 0, integratedErrorRoll = 0, integratedErrorYawSpeed=0;
-signed int control_roll=0,control_pitch=0,control_yaw=0;
+int control_roll=0, control_pitch=0, control_yaw=0;
 
+int PTerm, ITerm, DTerm;
 
 char controlMode = 0,controlActivated = 0;
 
+char appState = 'a';
+
 int thrustOn = 0;
+int a = 2, b = 3, c = 9;
+
+unsigned char m4offset = 5;
 
 #define dt 0.01
 #define freq 100
@@ -95,31 +88,31 @@ int thrustOn = 0;
 #define timeConstant 0.5
 #define compFilterCoef timeConstant / (timeConstant + dt)//0.9782;
 
-char kP = 50, kI = 75, kD = 20;
+unsigned char kP = 28, kI = 46, kD = 11; // idea: 19 70 5
 
 int shouldTrace = 0;
 
 void actionINT0(void) {
 	//unsigned int ii;
-	nirq++;
+	/*nirq++;
 	switch(nirq){
 		case 1:
 			thrustOffset = 0;
 			initialThurst = 0;
 		break;
 
-		/*case 120:
+		case 120:
 			initialThurst = 120;
-		break;	*/	
-
-		case 220:
-			initialThurst = 140;
 		break;	
 
-/*
+		case 220:
+			initialThurst = 120;
+		break;	
+
+
 		case 320:
-			initialThurst = 140;
-		break;	*/			
+			initialThurst = 120;
+		break;			
 
 		case 440:		
 			thrustOffset = 0;
@@ -131,7 +124,7 @@ void actionINT0(void) {
 	}	//printf("Occurence num. %d de TIMER1 \n", nirq);
 
 	// Acquittement de l'interruption
-	MCF_DTIM0_DTER = MCF_DTIM_DTER_REF | MCF_DTIM_DTER_CAP;
+	MCF_DTIM0_DTER = MCF_DTIM_DTER_REF | MCF_DTIM_DTER_CAP;*/
 }
 
 void actionINT2(void) {
@@ -156,10 +149,10 @@ int main (void)
 /*Init des IOs*/	
 	Init_5213();		//bus SPI
 	Init_PWM();
-	int result = Init_AccGyro();
+	int result = Init_sensors();
 	while(!result){	//Init des composants
 		printf("Erreur d'init Acc ou Gyro, retrying ...\n");
-		result = Init_AccGyro();
+		result = Init_sensors();
 	}
 	printf("Script journées portes ouvertes. Controles:\n");
 	printf("Ech: quitter\n");
@@ -176,96 +169,138 @@ int main (void)
 		while ((MCF_DTIM3_DTER & 2)==0);//attend prochain date ech
 		MCF_DTIM3_DTER = 2;				//RAZ Flag
 
-		GetInertie();	//retourne dans tabInertie les valeurs
+		GetInertie();	//remplacer par les nouvelles fonctions, voir Sandbox ou MainController
 		ComplementaryFilter(accData,gyrData,&pitch,&roll);
 
-		/*if (controlActivated){
-			if (controlMode){
-				errorPitch = targetPitch - pitch/10;
-				errorRoll = targetRoll - roll/10;	
-				errorYawSpeed = targetYawSpeed - gyrData[2] * 3.906;
+	
 
+		errorPitch = targetPitch - pitch/10;
+		errorRoll = targetRoll - pitch/10;
 
-				//printf("Integrated error pitch : %d \n",(signed int)integratedErrorPitch);
-				integratedErrorPitch +=  errorPitch; 
-				integratedErrorRoll  += errorRoll;
-				integratedErrorYawSpeed += errorYawSpeed;
+		control_pitch = errorPitch / kP;
+		control_roll = errorRoll / kP;
 
-				integratedErrorPitch = sat(integratedErrorPitch,-10000,10000);  // + ou - 300 
-				integratedErrorRoll =  sat(integratedErrorRoll,-10000,10000);
+		if (appState == 'a'){
+			throttle = 0;
+			MCF_PWM_PWMDTY7 = throttle;
+			MCF_PWM_PWMDTY3 = throttle;
 
-				deltaPitch = pitch - lastPitch;
-				lastPitch = pitch;
+			MCF_PWM_PWMDTY5 = throttle;
+			MCF_PWM_PWMDTY1 = throttle;
+		} else if (appState == 'b'){
+			throttle = 120;
+			MCF_PWM_PWMDTY7 = 0;
+			MCF_PWM_PWMDTY3 = 0;
 
-				deltaRoll = roll - lastRoll;
-				lastRoll = roll;				
+			MCF_PWM_PWMDTY5 = throttle;
+			MCF_PWM_PWMDTY1 = throttle;
 
-				control_pitch = errorPitch / kP + (integratedErrorPitch / freq) / kI - deltaPitch / kD;
-				control_roll = errorRoll / kP  + (integratedErrorRoll / freq ) /  kI - deltaRoll / kD;
+		} else if (appState == 'c'){
+			return;
+			kP = 15;
+			throttle = 20;
 
-				control_yaw = integratedErrorYawSpeed / freq / kI;	
-				control_yaw = 0;	
+			//moteur1 =  throttle + st + control_roll;
+			//moteur2 =  throttle + st - control_roll;
 
-				moteur1 =  throttle + st + control_roll;
-				moteur2 =  throttle + st - control_roll - control_yaw;
+			moteur3 =  throttle + control_pitch;
+			moteur4 =  throttle - control_pitch + m4offset;
 
-				moteur3 =  throttle + st + control_pitch + control_yaw;
-				moteur4 =  throttle + st - control_pitch;
+			//MCF_PWM_PWMDTY7 = (unsigned char)sat(moteur1+110,100,135);	
+			//MCF_PWM_PWMDTY3 = (unsigned char)sat(moteur2+110,100,135);
 
-				MCF_PWM_PWMDTY7 = (unsigned char)sat(moteur1+110,100,180);	
-				MCF_PWM_PWMDTY3 = (unsigned char)sat(moteur2+110,100,180);
+			MCF_PWM_PWMDTY5 = (unsigned char)sat(moteur3+110,100,135);
+			MCF_PWM_PWMDTY1 = (unsigned char)sat(moteur4+110,100,135);	
+		} else if (appState == 'D'){
+			return;
+			kP = 28;
+			throttle = 60;
 
-				//MCF_PWM_PWMDTY5 = (unsigned char)sat(moteur3+110,100,180);
-				//MCF_PWM_PWMDTY1 = (unsigned char)sat(moteur4+110,100,180);	//on limite a 180 pour commencer...
-				
-				throttle = 25;
-				//printf("Pitch [%d, %d, %d, %d] \n",pitch/100,control_pitch,integratedErrorPitch/10,deltaPitch);
-				//printf("Roll  [%d, %d, %d] \n",roll/10,errorRoll/10,integratedErrorRoll/10);
-				printf("Yaw [%d] \n",errorYawSpeed);
-			} else {
-				MCF_PWM_PWMDTY7 = 120;
-				MCF_PWM_PWMDTY3 = 120;
+			errorPitch = targetPitch - pitch/10;
 
-				MCF_PWM_PWMDTY5 = 120;
-				MCF_PWM_PWMDTY1 = 120;
-				throttle = 0;
-			}
+			integratedErrorPitch +=  errorPitch; 
+			integratedErrorPitch = sat(integratedErrorPitch,-8000,8000);  		
+
+			deltaPitch = pitch - lastPitch;
+			lastPitch = pitch;
+
+			PTerm = errorPitch / kP;
+			ITerm = (integratedErrorPitch / freq) / kI;
+			DTerm = deltaPitch / kD;
+
+			control_pitch = PTerm + ITerm - DTerm;
+
+			moteur3 =  throttle + st + control_pitch;
+			moteur4 =  throttle + st - control_pitch + m4offset;
+
+			MCF_PWM_PWMDTY7 = 0;	
+			MCF_PWM_PWMDTY3 = 0;
+
+			MCF_PWM_PWMDTY5 = (unsigned char)sat(moteur3+110,100,190);
+			MCF_PWM_PWMDTY1 = (unsigned char)sat(moteur4+110,100,190);	//on limite a 180 pour commencer...
+			//
+		}
+
+		/*if (thrustOn == 1){
+			throttle = 20;
+
+			moteur1 =  throttle + st + control_roll;
+			moteur2 =  throttle + st - control_roll;
+
+			moteur3 =  throttle + control_pitch;
+			moteur4 =  throttle - control_pitch + m4offset;
+
+			//MCF_PWM_PWMDTY7 = (unsigned char)sat(moteur1+110,100,135);	
+			//MCF_PWM_PWMDTY3 = (unsigned char)sat(moteur2+110,100,135);
+
+			MCF_PWM_PWMDTY5 = (unsigned char)sat(moteur3+110,100,135);
+			MCF_PWM_PWMDTY1 = (unsigned char)sat(moteur4+110,100,135);	
+			printf("Control pitch [%d] \n",control_pitch);		
+ 
 		} else {
-			MCF_PWM_PWMDTY1 = initialThurst;
-			//MCF_PWM_PWMDTY3 = initialThurst;
-			MCF_PWM_PWMDTY5 = initialThurst;
-			//MCF_PWM_PWMDTY7 = initialThurst;
+			throttle = 0;
+			MCF_PWM_PWMDTY7 = throttle;
+			MCF_PWM_PWMDTY3 = throttle;
+
+			MCF_PWM_PWMDTY5 = throttle;
+			MCF_PWM_PWMDTY1 = throttle;
 		}*/
 
-			if (thrustOn == 1){
-				MCF_PWM_PWMDTY7 = 120;
-				MCF_PWM_PWMDTY3 = 120;
-
-				MCF_PWM_PWMDTY5 = 120;
-				MCF_PWM_PWMDTY1 = 120;
-			} else {
-				MCF_PWM_PWMDTY7 = 0;
-				MCF_PWM_PWMDTY3 = 0;
-
-				MCF_PWM_PWMDTY5 = 0;
-				MCF_PWM_PWMDTY1 = 0;
-			}
 		/* Test clavier */
 		if (kbhit())
 			{
 				choix = getch();	//lire derniere touche appuyee
 				switch (choix)
 				{	
+				case '1':
+					targetRoll = (char)getch();
+					targetPitch = (char)getch();
+				break;			
+
 				case 'z':
 					pitchFromGyro = 0;
 					rollFromGyro = 0;
 				break;
-				case 'm':
-					if (getch() == '1'){
-						thrustOn = 1;
-					} else {
-						thrustOn = 0;
-					}
+				case '=':
+					kP += 1;
+					printf("kP [%d] \n",kP);		
+				break;
+				case '-':
+					kP -= 1;
+					printf("kP [%d] \n",kP);		
+				break;
+				case 'a':
+					appState = 'a';
+				break; 
+				case 'b':
+					appState = 'b';
+				break; 	
+				case 'c':
+					appState = 'c';
+				break;		
+				case 'D':
+					appState = 'D';
+					integratedErrorPitch = 0;
 				break;
 
 				case 'o':
@@ -281,12 +316,18 @@ int main (void)
 					out_byte(rollFromAcc/100);
 					out_byte(rollFromGyro/100);
 					out_byte(roll/100);
+					out_byte(control_pitch);
+					out_byte(control_roll);
 				break;									
 				case 'x':
-					printf("Acc X:%d Y:%d Z:%d \n",(char)accData[0],(char)accData[1],(char)accData[2]);
-					printf("Gyro 	X:%d Y:%d Z:%d \n",(char)gyrData[0],(char)gyrData[1],(char)gyrData[2]);
-					printf("Pitch 	A:%d G:%d C:%d \n",pitchFromAcc/100,pitchFromGyro/100,pitch/100);
-					printf("Roll 	A:%d G:%d C:%d \n",rollFromAcc/100,rollFromGyro/100,roll/100);
+					printf("Acc     X:%d  Y:%d  Z:%d \n",(char)accData[0],(char)accData[1],(char)accData[2]);
+					printf("Gyro 	X:%d  Y:%d  Z:%d \n",(char)gyrData[0],(char)gyrData[1],(char)gyrData[2]);
+					printf("Pitch 	A:%d  G:%d  C:%d \n",pitchFromAcc/100,pitchFromGyro/100,pitch/100);
+					printf("Roll 	A:%d  G:%d  C:%d \n",rollFromAcc/100,rollFromGyro/100,roll/100);
+				break;
+
+				case 'X':
+					printf("Target pitch[%d] roll[%d]",(char)targetPitch,(char)targetRoll);
 				break;
 			
 				case (27):
@@ -357,8 +398,7 @@ void Init_5213(void)
 	MCF_INTC_ICR21 = MCF_INTC_ICR_IL(0x5);
 	MCF_INTC_IMRL = MCF_INTC_IMRL & ~(MCF_INTC_IMRL_MASK19 | MCF_INTC_IMRL_MASK21);
 	
-	io_32(ADR_VECT_INT0) = (long)isrINT0; // Chargement du vecteur d'interruption dans la table
-	io_32(ADR_VECT_INT2) = (long)isrINT2;
+	//io_32(ADR_VECT_INT0) = (long)isrINT0; // Chargement du vecteur d'interruption dans la table
 	__asm("move.w #0x2200,%sr\n");	 // Initialisation a 2 du masque de priorite d'interruption dans le registre d'etat	
 	
 	//Config Timer2 pour calcul des temps passés, toutes les uS (prediv 80)
@@ -373,96 +413,6 @@ void Init_5213(void)
 	MCF_DTIM3_DTRR=9999; //Registre Reference pour 100Hz
 	MCF_DTIM3_DTCN=0; //RAZ registre Compteur
 	MCF_DTIM3_DTER=0x03; //RAZ registre Drapeaux	
-	
-	//Proprietes du transfert SPI
-	MCF_QSPI_QMR = 0xA308;		//tfert 8 bits, CPOL=1, CPHA=1 fclk=1Mhz
-	MCF_QSPI_QDLYR = 0x0000;   	//Activation du  bus SPI   //////>>   pour init un transfert mettre 0x8000
-	MCF_QSPI_QWR = 0x0000;     	//Pointeurs de la RAM (FIFO limitee a un mot)    
-	MCF_QSPI_QIR = 0xD00D;     	//Drapeau fin de transfert
-	MCF_QSPI_QAR = 0x0020;		//selection RAM de commande
-	MCF_QSPI_QDR = 0x0E00;		// A  defaut
-	
-	// init des CS Gyro et accelero	
-	MCF_GPIO_DDRUA|=0x08;		// CS du gyro mis en sortie
-	MCF_GPIO_SETUA=0x08;		// mise à niveau haut du CS gyro
-	MCF_GPIO_DDRQS|=0x10;		// CS de l'accéléro mis en sortie
-	MCF_GPIO_SETQS=0x10;		// mise à niveau haut du CS acc
 }	
-
-
-void GetInertie(void)
-{
-	char bufAcc[6],bufGyro[6];
-	//short gyrData[3], accData[3];
-
-	unsigned char ad, datawrite, dataread;
-	unsigned char gyro_value,acc_value;
-
-	double doubleX,doubleY;
-//lecture des donnees
-	CSA_ON;
-	SpiRead6R(bufAcc);
-	CSA_OFF;
-	CSG_ON;
-	SpiRead6R(bufGyro);
-	CSG_OFF;
-
-	accData[0] = bufAcc[1];
-	accData[1] = bufAcc[3];
-	accData[2] = bufAcc[5];
-
-	gyrData[0] = bufGyro[1];
-	gyrData[1] = bufGyro[3];
-	gyrData[2] = bufGyro[5];	
-}
-
-void ComplementaryFilter(char aData[3], char gData[3], int *pitch, int *roll)
-{
-    int pitchAcc, rollAcc;               
- 	
-
-    *pitch += 100 * gData[0] * 3.906 * dt; // Angle around the X-axis
-    *roll -= 100 * gData[1] * 3.906 * dt;    // Angle around the Y-axis
-
-    //if (testMode){
-    pitchFromGyro += 100 * (gData[0] * 3.906) * dt;
-    rollFromGyro -= 100 * (gData[1] * 3.906) * dt; 
-	//}
-
-    int forceMagnitudeApprox = abs(aData[0]) + abs(aData[1]) + abs(aData[2]);
-    if (forceMagnitudeApprox > 32 && forceMagnitudeApprox < 128) // 32 - 128 -- 8192 - 32768
-    {
-    	//if (testMode){
-    	pitchFromAcc = 10 * __atan2(aData[0], aData[2]);
-    	rollFromAcc = 10 * __atan2(-aData[1], aData[2]);
-    	//}
-
-        pitchAcc = 10 * __atan2(aData[0], aData[2]); // 1 2
-        *pitch = *pitch * compFilterCoef + pitchAcc * (1 - compFilterCoef);
-
-
-        rollAcc = 10 * __atan2(-aData[1], aData[2]); //-0 2
-        *roll = *roll * compFilterCoef + rollAcc * (1 - compFilterCoef);
-    }
-} 
-
-
-int __atan2(float y, float x){
-  float z = y / x;
-  int zi = abs((int)(z * 100)); 
-  if ( zi < 100 ){
-    if (zi > 10) 
-     z = z / (1.0f + 0.28f * z * z);
-   if (x < 0) {
-     if (y < 0) z -= PI;
-     else z += PI;
-   }
-  } else {
-   z = (PI / 2.0f) - z / (z * z + 0.28f);
-   if (y < 0) z -= PI;
-  }
-  z *= (180.0f / PI * 10); 
-  return z;
-}
 
 

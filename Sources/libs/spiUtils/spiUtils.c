@@ -2,11 +2,7 @@
 
 void Init_spi (void)
 {
-//configuration des broches multifonctions
-	MCF_GPIO_PUAPAR &= 0x3F;	// Port UCTS0 en GPIO pour le CS du gyro
-	MCF_GPIO_PQSPAR = 0x0015;	//QS4 GPIO(CS Acc), QS3..1 en primary pour SPI	      
-	
-//Proprietes du transfert
+	//Proprietes du transfert SPI
 	MCF_QSPI_QMR = 0xA308;		//tfert 8 bits, CPOL=1, CPHA=1 fclk=1Mhz
 	MCF_QSPI_QDLYR = 0x0000;   	//Activation du  bus SPI   //////>>   pour init un transfert mettre 0x8000
 	MCF_QSPI_QWR = 0x0000;     	//Pointeurs de la RAM (FIFO limitee a un mot)    
@@ -14,66 +10,79 @@ void Init_spi (void)
 	MCF_QSPI_QAR = 0x0020;		//selection RAM de commande
 	MCF_QSPI_QDR = 0x0E00;		// A  defaut
 	
-// init des CS Gyro et accelero	
-	MCF_GPIO_DDRUA|=0x08;		// CS du gyro mis en sortie
-	MCF_GPIO_SETUA=0x08;		// mise à niveau haut du CS gyro
+	// init des CS Gyro et accelero	
+	MCF_GPIO_SETQS=0x08;		// mise à niveau haut du CS gyro	
+	MCF_GPIO_DDRQS|=0x08;		// CS du gyro mis en sortie
+	MCF_GPIO_SETQS=0x10;		// mise à niveau haut du CS acc	
 	MCF_GPIO_DDRQS|=0x10;		// CS de l'accéléro mis en sortie
-	MCF_GPIO_SETQS=0x10;		// mise à niveau haut du CS acc
-	
+	MCF_GPIO_SETQS=0x20;		// mise à niveau haut du CS acc	
+	MCF_GPIO_DDRQS|=0x20;		// CS de l'accéléro mis en sortie
+	MCF_GPIO_SETQS=0x40;		// mise à niveau haut du CS acc	
+	MCF_GPIO_DDRQS|=0x40;		// CS de l'accéléro mis en sortie	
 }
 
-
-char Init_AccGyro (void)
+char Init_sensors (void)
 {
-	unsigned char gyro_value, acc_value,control_value;
-	//config Gyro CTRL_REG1:
-	//ODR=400Hz, Cut-off=110Hz => DR+BW="1011"
-	//Tous les axes activés : PD=1, Zen=1, Yen=1, Xen=1
+
+	unsigned char gyro_value, acc_value, baro_value;
+
+
 	CSG_ON;
-	SpiWrite8(ST_CTRL_REG1,0x08); // power down first
-	SpiWrite8(ST_CTRL_REG1,0xBF);//0b1011.1111
-	CSG_OFF;
-	
-	//CTRLREG2:
-	//normal mode :0000
-	//filtre passe haut = 0,1Hz, avec ODR400Hz : 1000
-	CSG_ON;
-	SpiWrite8(ST_CTRL_REG2,0x08);
-	CSG_OFF;
-	
-	//CTRLREG3 : config defaut =0
-	//CTRLREG4 : config FS1-FS0 =01 pour sensibilite=500deg/s (=> Quantum=17,5mdps)
-	CSG_ON;
-	SpiWrite8(ST_CTRL_REG4,0x10);
-	CSG_OFF;
-	
-	//CTRLREG5 : HPF ?
-	//CSG_ON;
-	//SpiWrite8(ST_CTRL_REG5,0x10);//HPF enable : 0x10 
-	//CSG_OFF;
-	
-	//Config Acc CTRL_REG1:
-	CSA_ON;
-	//SpiWrite8(ST_CTRL_REG1,0x37);	//Mode normal, data rate 400Hz, en all axis, LP 292Hz
-	SpiWrite8(ST_CTRL_REG1,0x2F);	 //Mode normal, data rate 100Hz, en all axis, LP  74Hz
-	CSA_OFF;
-	//CTRL_REG2 : default value : Filters bypass
-	//CTRLREG3: default VAlue, pas d'ITS
-	//CTRLREG4 : default value : full scale =+-2g, /!\ continuous update MSB LSB
-	//CTRLREG5 : default value : sleep to wake disabled
-	CSA_ON;
-	acc_value=SpiRead8(ST_WHO_AM_I);
-	CSA_OFF;
-	CSG_ON;
-	gyro_value=SpiRead8(ST_WHO_AM_I);
+		SpiWrite8(ST_CTRL_REG1,0x08); // power down first
 	CSG_OFF;
 
+	CSG_ON;
+		SpiWrite8(ST_CTRL_REG1,0xBF);//0b1011.1111
+	CSG_OFF;
+	
+	CSG_ON;
+		SpiWrite8(ST_CTRL_REG2,0x08);
+	CSG_OFF;
+	
+	CSG_ON;
+		SpiWrite8(ST_CTRL_REG4,0x10);
+	CSG_OFF;
+
+	CSG_ON;
+		gyro_value=SpiRead8(ST_WHO_AM_I);
+	CSG_OFF;	
 	
 
-	if ((acc_value != 0x32) || (gyro_value !=0xd3)){
+	CSA_ON;
+		SpiWrite8(ST_CTRL_REG1,0x67);// 0x67	 //Mode normal, data rate 100Hz, en all axis, LP  74Hz
+	CSA_OFF;	
+
+	CSA_ON;
+		SpiWrite8(ST_CTRL_REG5,0x74); // 74
+	CSA_OFF;
+
+
+	CSA_ON;
+		SpiWrite8(ST_CTRL_REG6,0x00);
+	CSA_OFF;
+
+	CSA_ON;
+		SpiWrite8(ST_CTRL_REG7,0x00);
+
+	CSA_OFF;
+
+	CSA_ON;
+		acc_value=SpiRead8(ST_WHO_AM_I);
+	CSA_OFF;
+
+	CS3_ON;
+		SpiWrite8(ST_CTRL_REG1,0xC0);
+	CS3_OFF;
+
+	CS3_ON;
+		baro_value = SpiRead8(ST_WHO_AM_I);
+	CS3_OFF;
+
+	printf("Acc value: 0x%x, Gyro value: 0x%x, Baro value: 0x%x\n", acc_value, gyro_value, baro_value);		
+
+	if ((acc_value != 0x49) || (gyro_value !=0xd3) || (baro_value !=0xbd)){
 		return(0);
 	} else {
-		printf("Acc value: 0x%x, Gyro value: 0x%x \n",acc_value,gyro_value);
 		return(1);
 	} 
 }
@@ -94,13 +103,13 @@ void SpiWrite8 (unsigned char ad, unsigned char datawrite)
 	while((MCF_QSPI_QIR & MCF_QSPI_QIR_SPIF)==0); 	//On verifie qu'il est termine
 }
 
-void SpiRead6R(char* buffer)
+void SpiRead6R(char startAddress, char* buffer)
 {
 	unsigned char reg;
 	MCF_QSPI_QIR = 0xD00D;	//RAZ SPIF
 	//Transfert du premier mot = code fonction
 	MCF_QSPI_QAR = 0x0000;			//On se place au niveau de l'envoi dans la RAM : transmit RAM
-	MCF_QSPI_QDR = ST_OUT_X_L | 0xC0; 	//On envoie le code fonction (8 bits) avec mise a 1 bit R/W et M/S
+	MCF_QSPI_QDR = startAddress | 0xC0; 	//On envoie le code fonction (8 bits) avec mise a 1 bit R/W et M/S
 	MCF_QSPI_QDLYR = 0x8000; 		//On init le transfert (en=1)	
 	while((MCF_QSPI_QIR & MCF_QSPI_QIR_SPIF)==0); 	//On verifie qu'il est termine
 	for(reg=0;reg<6;reg++)	//parcourir les 6 registres de donnees d'axes
@@ -130,3 +139,17 @@ char SpiRead8 (unsigned char ad)
 	dataread = (unsigned char) MCF_QSPI_QDR; //On recupere la Data recue
 	return(dataread);
 }
+
+void SpiListSlaves(){
+	unsigned char who_am_i,i;
+	char message[40] = "Slave ID %d in slot %d";
+	for (i=0;i<4;i++){
+		MCF_GPIO_SETQS = (0x08 << i) ;
+			who_am_i=SpiRead8(ST_WHO_AM_I);
+			printf(message, who_am_i & 0xFF, i);
+		MCF_GPIO_CLRQS = ~(0x08 << i) ;
+
+	}
+}
+
+

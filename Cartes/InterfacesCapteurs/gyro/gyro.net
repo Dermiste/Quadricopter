@@ -1,0 +1,234 @@
+# EESchema Netlist Version 1.1 created  24/02/2011 11:44:03
+(
+ ( /4D6632FB $noname  C5 C {Lib=C}
+  (    1 N-000037 )
+  (    2 N-000005 )
+ )
+ ( /4D662FB0 $noname  C2 C {Lib=C}
+  (    1 N-000009 )
+  (    2 /pll1 )
+ )
+ ( /4D662FAD $noname  C3 C {Lib=C}
+  (    1 /pll2 )
+  (    2 /pll1 )
+ )
+ ( /4D662FA8 $noname  R4 R {Lib=R}
+  (    1 /pll2 )
+  (    2 N-000009 )
+ )
+ ( /4D662E3D $noname  R5 R {Lib=R}
+  (    1 N-000001 )
+  (    2 N-000030 )
+ )
+ ( /4D662E43 $noname  C4 C {Lib=C}
+  (    1 N-000005 )
+  (    2 N-000001 )
+ )
+ ( /4D662D72 $noname  R3 R {Lib=R}
+  (    1 N-000005 )
+  (    2 N-000013 )
+ )
+ ( /4D662D6F $noname  R2 R {Lib=R}
+  (    1 N-000005 )
+  (    2 N-000002 )
+ )
+ ( /4D662CE1 $noname  R1 R {Lib=R}
+  (    1 N-000003 )
+  (    2 N-000004 )
+ )
+ ( /4D662CDD $noname  C1 C {Lib=C}
+  (    1 N-000005 )
+  (    2 N-000004 )
+ )
+ ( /4D662547 $noname  R8 R {Lib=R}
+  (    1 N-000005 )
+  (    2 N-000006 )
+ )
+ ( /4D662543 $noname  C6 C {Lib=C}
+  (    1 N-000005 )
+  (    2 N-000026 )
+ )
+ ( /4D66250F $noname  C7 C {Lib=C}
+  (    1 N-000006 )
+  (    2 N-000026 )
+ )
+ ( /4D6624A5 $noname  R7 R {Lib=R}
+  (    1 N-000007 )
+  (    2 N-000005 )
+ )
+ ( /4D662408 $noname  R6 R {Lib=R}
+  (    1 N-000005 )
+  (    2 N-000025 )
+ )
+ ( /4D6621D2 $noname  P1 DIL8 {Lib=DIL8}
+  (    1 N-000033 )
+  (    2 N-000022 )
+  (    3 N-000018 )
+  (    4 N-000023 )
+  (    5 N-000008 )
+  (    6 N-000037 )
+  (    7 N-000005 )
+  (    8 ? )
+ )
+ ( /4D6620D4 $noname  U2 LY330 {Lib=LY330}
+  (    1 N-000037 )
+  (    2 N-000025 )
+  (    3 N-000026 )
+  (    4 N-000005 )
+  (    5 ? )
+  (    6 N-000008 )
+  (    7 N-000023 )
+  (    8 N-000007 )
+  (    9 N-000037 )
+  (   10 ? )
+ )
+)
+*
+{ Allowed footprints by component:
+$component C5
+ SM*
+ C?
+ C1-1
+$endlist
+$component C2
+ SM*
+ C?
+ C1-1
+$endlist
+$component C3
+ SM*
+ C?
+ C1-1
+$endlist
+$component R4
+ R?
+ SM0603
+ SM0805
+ R?-*
+ SM1206
+$endlist
+$component R5
+ R?
+ SM0603
+ SM0805
+ R?-*
+ SM1206
+$endlist
+$component C4
+ SM*
+ C?
+ C1-1
+$endlist
+$component R3
+ R?
+ SM0603
+ SM0805
+ R?-*
+ SM1206
+$endlist
+$component R2
+ R?
+ SM0603
+ SM0805
+ R?-*
+ SM1206
+$endlist
+$component R1
+ R?
+ SM0603
+ SM0805
+ R?-*
+ SM1206
+$endlist
+$component C1
+ SM*
+ C?
+ C1-1
+$endlist
+$component R8
+ R?
+ SM0603
+ SM0805
+ R?-*
+ SM1206
+$endlist
+$component C6
+ SM*
+ C?
+ C1-1
+$endlist
+$component C7
+ SM*
+ C?
+ C1-1
+$endlist
+$component R7
+ R?
+ SM0603
+ SM0805
+ R?-*
+ SM1206
+$endlist
+$component R6
+ R?
+ SM0603
+ SM0805
+ R?-*
+ SM1206
+$endlist
+$endfootprintlist
+}
+{ Pin List by Nets
+Net 1 "" ""
+ R5 1
+ C4 2
+Net 4 "" ""
+ C1 2
+ R1 2
+Net 5 "" ""
+ U2 4
+ P1 7
+ R6 1
+ R7 2
+ C6 1
+ R8 1
+ C1 1
+ R2 1
+ R3 1
+ C4 1
+ C5 2
+Net 6 "" ""
+ R8 2
+ C7 1
+Net 7 "" ""
+ R7 1
+ U2 8
+Net 8 "" ""
+ P1 5
+ U2 6
+Net 9 "" ""
+ C2 1
+ R4 2
+Net 12 "/pll2" "pll2"
+ C3 1
+ R4 1
+Net 21 "/pll1" "pll1"
+ C3 2
+ C2 2
+Net 23 "" ""
+ P1 4
+ U2 7
+Net 25 "" ""
+ R6 2
+ U2 2
+Net 26 "" ""
+ C7 2
+ U2 3
+ C6 2
+Net 37 "" ""
+ P1 6
+ U2 1
+ U2 9
+ C5 1
+}
+#End

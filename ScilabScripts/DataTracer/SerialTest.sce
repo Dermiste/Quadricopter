@@ -1,9 +1,9 @@
 funcprot(0);
-exec("Utils.sci");
+//exec("Utils.sci");
 
 global slm;
 
-dataWidth = 7;
+dataWidth = 3;
 quadSampleRate = 100;
 
 function flushSerial()
@@ -20,46 +20,61 @@ endfunction
 
 function plotData()
     disp('plot current data');
-    clf();
+
+    
     f1=scf(1);  //creates figure with id==1 and make it the current one
+    //clf(f1,'reset');
     f1.color_map = jetcolormap(64);
     f1.figure_size = [400, 400];
-    f1.figure_position = [0,0];
+    f1.figure_position = [0,0]; 
+    
     plot(accData(:,2),'r-');
-    plot(accData(:,4),'g-');  
-    plot(accData(:,6),'k-'); 
+    plot(accData(:,3),'g-');  
+    //plot(accData(:,4),'k-'); 
     
-    //plot(accData(:,5),'k-'); 
     xlabel("Numéro d échantillon","fontsize",2);
-    xtitle("Accélération et vitesse angulaire");
-    //legends(['xAcc';'yAcc';'zAcc';'echelon 1'],[-1,2 3],opt="lr");
-    
-    //hz = iir(8,'lp','butt',50/quadSampleRate,[]);
-    //plot(flts(accData(:,12),hz),'b--');
-    //plot(flts(accData(:,13),hz),'k--');
+    xtitle("Accélération");
+    hl=legend(['x';'y';'z']);    
+    return;
      
     f2=scf(2);  //creates figure with id==2 and make it the current one
+    //clf(f2,'reset');
     f2.color_map = jetcolormap(64);
     f2.figure_size = [400, 400];
-    f2.figure_position = [420,0];
-    plot(accData(:,3),'r-');
-    plot(accData(:,5),'g-');  
-    plot(accData(:,7),'k-');  
+    f2.figure_position = [420,0]; 
+    
+    plot(accData(:,5),'r-');
+    plot(accData(:,6),'g-');  
+    plot(accData(:,7),'k-');    
 
     xlabel("Numéro d échantillon","fontsize",2);  
-    xtitle("Inclinaison");
-    //legends(['x axis speed';'y axis speed';'z axis speed';'echelon 2'],[-1,2 3],opt="lr");
-    return
+    xtitle("Vitesse angulaire");
+    hl=legend(['θx';'θy';'θZ']);
+            
     f3=scf(3);  //creates figure with id==2 and make it the current one
+    //clf(f3,'reset');
     f3.color_map = jetcolormap(64);
     f3.figure_size = [400, 400];
     f3.figure_position = [840,0];
     plot(accData(:,8),'r-');
     plot(accData(:,9),'g-');
-    plot(accData(:,10),'b-');    
-    plot(accData(:,11),'m-'); 
+    plot(accData(:,10),'k-');
+    plot(accData(:,14)*5,'b-');
+    //return;
     xlabel("Numéro d échantillon","fontsize",2);
-    xtitle("Accélération angulaire");     
+    xtitle("Pitch");  
+    hl=legend(['Pitch - Acc';'Pitch - Gyro ';'Pitch - Comp']);
+    //return;
+    f4=scf(4);  //creates figure with id==2 and make it the current one
+    f4.color_map = jetcolormap(64);
+    f4.figure_size = [400, 400];
+    f4.figure_position = [840,0];
+    plot(accData(:,1),'r-');
+    plot(accData(:,12),'g-');
+    plot(accData(:,13),'k-');
+    xlabel("Numéro d échantillon","fontsize",2);
+    xtitle("Roll");         
+    hl=legend(['Roll - Acc';'Roll - Gyro ';'Roll - Comp']);
     //legends(['x axis acc';'y axis acc';'z axis acc';'echelon 3'],[-1,2 3],opt="lr");       
 endfunction
 
@@ -76,6 +91,11 @@ function testFFT()
     n=size(f,'*');
     clf();
     plot(f,abs(y(1:n)));
+endfunction
+
+function saveCurrentData()
+    dt=getdate();
+    write_csv(double(accData),sprintf("Data/%d:%d_%d:%d:%d_imuData.csv",dt(2),dt(6),dt(7),dt(8),dt(9)));
 endfunction
 
 

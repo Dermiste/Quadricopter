@@ -1,0 +1,31 @@
+Cmp-Mod V01 Created by CvPCB (2011-01-18 BZR 2727)-testing date = 18/02/2011 11:46:54
+
+BeginCmp
+TimeStamp = /4D416AF3;
+Reference = C1;
+ValeurCmp = 10uF;
+IdModule  = SM1210;
+EndCmp
+
+BeginCmp
+TimeStamp = /4D416AFA;
+Reference = C2;
+ValeurCmp = 100nF;
+IdModule  = SM1206;
+EndCmp
+
+BeginCmp
+TimeStamp = /4D416855;
+Reference = P1;
+ValeurCmp = DIL8;
+IdModule  = DIP-8__300_ELL;
+EndCmp
+
+BeginCmp
+TimeStamp = /4D41746C;
+Reference = U1;
+ValeurCmp = LIS331DLH;
+IdModule  = LGA16;
+EndCmp
+
+EndListe

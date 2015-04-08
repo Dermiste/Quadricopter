@@ -8,7 +8,7 @@
    5               		.file	"crt.s"
    6               		XDEF	start
    7               		XDEF	_start
-   8               	.xref end, __bss_start	/* predefini par le linker, debut et fin de section BSS */
+   8               	/*.xref end, __bss_start	/* predefini par le linker, debut et fin de section BSS */
    9               		ALIGN	4
   10               	
   11               	
@@ -20,9 +20,9 @@
   17               	/*    move.l  #(__SP_INIT),%a7	 Initialize stack pointer %a7 to value in linker command file.*/
   18               		
   19               	/* raz BSS section */
-  20 0002 207C 0000 		move.l #__bss_start, %a0;
+  20 0002 207C 0000 		move.l #__BSS_START, %a0;
   20      0000 
-  21 0008 203C 0000 		move.l #end, %d0;
+  21 0008 203C 0000 		move.l #__BSS_END, %d0;
   21      0000 
   22               	
   23               	clr_bss_ram:
@@ -69,6 +69,6 @@ DEFINED SYMBOLS
       libs/crt/crt.s:47     .text:0000000000000026 __fini
 
 UNDEFINED SYMBOLS
-__bss_start
-end
+__BSS_START
+__BSS_END
 main
